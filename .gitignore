@@ -1,0 +1,31 @@
+# macOS / Windows
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Xcode (the project is generated from ios/project.yml by XcodeGen)
+*.xcodeproj/
+*.xcworkspace/
+xcuserdata/
+DerivedData/
+build/
+*.xcresult
+
+# Android / Gradle
+.gradle/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.keystore
+*.jks
+.kotlin/
+
+# Android Studio / IntelliJ (shared run configs and code style can be added back explicitly)
+.idea/
+*.iml
+
+# Claude Code local state
+.claude/
