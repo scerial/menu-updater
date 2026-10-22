@@ -1,13 +1,13 @@
 # Menu Updater — Claude context
 
-Development now happens in this repo (`~/Developer/menu-updater`). The old iCloud Drive folder `Menu Updater/` is an archive and is no longer updated; all paths below are relative to the repo root (iOS project in `ios/`, so run `xcodegen generate` and `xcodebuild` from there). The icon sources are in `design/IconComposer/`.
+Development now happens in this repo (Mac clone `~/Developer/menu-updater`, Windows clone `C:\dev\menu-updater`). The old iCloud Drive folder `Menu Updater/` is an archive and is no longer updated; all paths below are relative to the repo root (iOS project in `ios/`, so run `xcodegen generate` and `xcodebuild` from there). The icon sources are in `design/IconComposer/`.
 
 Stable facts that are not in `ios/HANDOFF.md` or `android/PLAN.md`. Read those for architecture, file map and status.
 
 ## Preferences and feedback
 - Keep replies short. Report outcomes plainly, including what was only build-checked and not looked at.
 - Korean UI text, friendly "~해요" tone. Text-only menus; no image fallback.
-- Everything runs on the device. No backend, no Tailscale. The `Backend(Windows host)` folder is empty on purpose.
+- Everything runs on the device. No backend, no Tailscale.
 - iPhone is portrait only (landscape was judged not worth it). iPad supports all four orientations.
 - The overall text scale is fixed at 80%. It was chosen on a device with a temporary slider, which was then removed. The in-app size setting has three tiers: 작게 / 보통 / 크게.
 - Do not commit or push unless asked.
@@ -27,13 +27,19 @@ Stable facts that are not in `ios/HANDOFF.md` or `android/PLAN.md`. Read those f
 - Signing: automatic, team `S9553U34PA`, bundle id `com.menuupdater.weeklymenu`.
 - iPhone 17 Pro simulator id: `3984BDE0-402B-472E-8E07-B2BBCF95D66A`. The iPad Pro 13" simulator `6C54E96D-…` no longer resolves as a destination.
 - Test: `xcodebuild test -project WeeklyMenu.xcodeproj -scheme WeeklyMenu -destination 'id=3984BDE0-402B-472E-8E07-B2BBCF95D66A' -derivedDataPath <temp dir>`. The OCR test takes about 45 s.
-- App icon: Icon Composer `Sources/AppIcon.icon`, enabled by `ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon`. Source layers live in `IconComposer/`.
-- The project sits in iCloud Drive. A recursive grep of the whole drive times out, so search inside the project folder only.
+- App icon: Icon Composer `Sources/AppIcon.icon`, enabled by `ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon`. Source layers live in `design/IconComposer/`.
+- The `.icon` bundles are folders on macOS but show up as 0-byte files in iCloud for Windows, so edit them on the Mac only.
 
+## Windows / Android setup
+- Windows clone: `C:\dev\menu-updater`, outside iCloud Drive and OneDrive. Android work goes on the `android-port` branch; iOS fixes go on `main` or a short-lived branch. The user pulls before starting and pushes when done on each machine; agents commit or push only when asked.
+- Why not iCloud: it leaves files as placeholders, can't represent macOS bundles on Windows, can create "file 2" conflict copies, and would sync Gradle and Xcode build output.
+- `gh` is at `C:\Program Files\GitHub CLI\gh.exe` (not on PATH in older shells) and signed in as `scerial`; `gh auth setup-git` is done. Commit identity: Youngmin Kim <jacobkim0707@gmail.com>.
+- In the VS Code extension, a `!` command typed in the prompt is sent as text and not run. Run interactive logins as a background task and pass the device code to the user.
+- Line endings: `.gitattributes` uses `text=auto`, so the "LF will be replaced by CRLF" warnings on Windows are expected.
 ## Gotchas
 - Previews (`PreviewData.swift`) can only be rendered in the Xcode canvas, not from the command line.
 - OCR output varies between runs and can misread dish names.
 - Column headers read `10월20일(화)`, and the year is never shown, so matching uses month and day.
 - The ingredient-origin line ("쌀: 국내산 / …") sits above the `원산지` label and must stay cut off from the last meal.
 - Delete the app from the simulator after changing the icon; the home screen caches icons.
-- `gh` is not installed on this Mac, and git has no stored GitHub credentials in the Claude Code environment, so clone, pull and push have to be done by the user or after logging in.
+- On the Mac, `gh` is not installed and git has no stored GitHub credentials in the Claude Code environment, so clone, pull and push have to be done by the user or after logging in.
