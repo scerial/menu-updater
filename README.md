@@ -5,7 +5,7 @@ Shows today's and this week's 순천향대학교 cafeteria menus from https://ww
 | Folder | What | Built on |
 |---|---|---|
 | `ios/` | SwiftUI iPhone/iPad app (Apple Vision OCR). See `ios/README.md` and `ios/HANDOFF.md`. | Mac (Xcode + XcodeGen) |
-| `android/` | Kotlin + Jetpack Compose port (ML Kit OCR). See `android/port_plan.md`. | Windows (Android Studio) |
+| `android/` | Kotlin + Jetpack Compose port (ML Kit OCR). See `android/port_plan.md` (requirements) and `android/PLAN.md` (working plan and status). | Windows (Android Studio) |
 | `design/IconComposer/` | App icon source layers. | — |
 
 ## Working across Mac and Windows
