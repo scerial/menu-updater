@@ -1,0 +1,80 @@
+{
+  "fill-specializations" : [
+    {
+      "value" : {
+        "automatic-gradient" : "display-p3:0.88627,0.49020,0.40784,1.00000"
+      }
+    },
+    {
+      "appearance" : "dark",
+      "value" : {
+        "automatic-gradient" : "srgb:0.08627,0.09412,0.11373,1.00000"
+      }
+    }
+  ],
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "hidden" : true,
+          "image-name" : "tray_simple_white.svg",
+          "name" : "tray_simple_white"
+        },
+        {
+          "blend-mode-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : "darken"
+            }
+          ],
+          "fill" : "automatic",
+          "glass" : true,
+          "hidden" : false,
+          "image-name" : "tray_full_white.svg",
+          "name" : "tray_full_white",
+          "position" : {
+            "scale" : 0.97,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "hidden" : true,
+          "image-name" : "tray_full_coral.svg",
+          "name" : "tray_full_coral"
+        },
+        {
+          "hidden" : true,
+          "image-name" : "plate_dark.svg",
+          "name" : "plate_dark"
+        },
+        {
+          "hidden" : true,
+          "image-name" : "background_dark.svg",
+          "name" : "background_dark"
+        },
+        {
+          "hidden" : true,
+          "image-name" : "background_coral.svg",
+          "name" : "background_coral"
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.3
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}

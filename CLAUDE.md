@@ -1,5 +1,7 @@
 # Menu Updater — Claude context
 
+Development now happens in this repo (`~/Developer/menu-updater`). The old iCloud Drive folder `Menu Updater/` is an archive and is no longer updated; all paths below are relative to the repo root (iOS project in `ios/`, so run `xcodegen generate` and `xcodebuild` from there). The icon sources are in `design/IconComposer/`.
+
 Stable facts that are not in `ios/HANDOFF.md` or `android/PLAN.md`. Read those for architecture, file map and status.
 
 ## Preferences and feedback
