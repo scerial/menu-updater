@@ -6,6 +6,10 @@ lifecycleRuntimeKtx = "2.9.3"
 activityCompose = "1.10.1"
 composeBom = "2026.09.00"
 junit = "4.13.2"
+kotlinxSerializationJson = "1.8.0"
+kotlinxCoroutines = "1.9.0"
+jsoup = "1.18.3"
+okhttp = "4.12.0"
 mlkitTextKorean = "16.0.1"
 androidxTestExtJunit = "1.2.1"
 androidxTestRunner = "1.6.2"
@@ -22,6 +26,12 @@ androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
+jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+okhttp-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
 mlkit-text-korean = { group = "com.google.mlkit", name = "text-recognition-korean", version.ref = "mlkitTextKorean" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxTestExtJunit" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidxTestRunner" }
@@ -31,3 +41,4 @@ androidx-test-core = { group = "androidx.test", name = "core", version.ref = "an
 android-application = { id = "com.android.application", version.ref = "agp" }
 # Kotlin is built into AGP 9.0+; only the Compose compiler plugin is applied separately.
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
