@@ -43,4 +43,12 @@ dependencies {
     implementation(libs.androidx.material3)
     debugImplementation(libs.androidx.ui.tooling)
     testImplementation(libs.junit)
+
+    // On-device Korean OCR (bundled model; works offline on first run).
+    implementation(libs.mlkit.text.korean)
+
+    // Instrumented tests (OCR spike runs on a device/emulator).
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.core)
 }
