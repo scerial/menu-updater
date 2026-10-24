@@ -92,6 +92,21 @@ class MenuTableParserTest {
     }
 
     @Test
+    fun dropsLogoAndWatermarkTokensThatOcrIntoCells() {
+        val everything = (parse("hyangseol1").days + parse("faculty").days + parse("medical").days)
+            .flatMap { it.meals }.flatMap { it.items }
+
+        // Pure logo/watermark fragments must not survive as dishes.
+        for (junk in listOf("HALAL", "SCH", "AGOO0-PACE", "A0000-RACE", "MAL사")) {
+            assertFalse("leaked $junk", everything.contains(junk))
+        }
+        // No item is left non-Korean, and a trailing watermark is stripped off a real dish.
+        assertFalse(everything.any { item -> item.none { it in '가'..'힣' } })
+        assertTrue(everything.contains("명엽채볶음"))
+        assertFalse(everything.any { it.contains("HALAL") })
+    }
+
+    @Test
     fun returnsNullWhenNoDateHeadersAreRecognized() {
         val noHeaders = listOf(RecognizedLine("밥", Rect(0.2, 0.5, 0.05, 0.02)))
         assertNull(MenuTableParser.parse(noHeaders))

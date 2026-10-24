@@ -17,6 +17,10 @@ object MenuTableParser {
     // so match 주간…표 loosely rather than the exact word, then strip it to leave the cafeteria name.
     private val titleRegex = Regex("""주간\S*표""")
 
+    // The restaurant's logo/watermark (AGOODPLACE, HALAL, SCH, …) OCRs into cells as fake dishes.
+    // Dish names are Korean, so strip runs of Latin letters and drop anything with no Hangul left.
+    private val latinRun = Regex("[A-Za-z]{2,}")
+
     private data class Header(val month: Int, val day: Int, val weekday: String, val box: Rect)
 
     fun parse(lines: List<RecognizedLine>): MenuTable? {
@@ -45,7 +49,7 @@ object MenuTableParser {
         for (line in lines) {
             val text = line.text.trim()
             if (line.box.midY >= headerBottom || line.box.midY <= footerCutoff) continue
-            if (text in mealNames || text.isEmpty()) continue
+            if (text in mealNames || cleanItem(text) == null) continue
             val column = nearestColumn(line, headers, columnSpacing * 0.6) ?: continue
             val meal = nearestMeal(line, mealLabels)
             cells[column][meal].add(line)
@@ -58,7 +62,7 @@ object MenuTableParser {
             val meals = mealTitles.indices.mapNotNull { meal ->
                 val items = cells[column][meal]
                     .sortedByDescending { it.box.midY }
-                    .map { it.text.trim() }
+                    .mapNotNull { cleanItem(it.text) }
                     .toMutableList()
                 commonItems[meal]?.let { items.add(it) }
                 if (items.isEmpty()) null else MealSection(mealTitles[meal], items)
@@ -110,6 +114,20 @@ object MenuTableParser {
         if (candidate.box.midY >= otherBottom - 0.01) return null
 
         cells[center][meal].removeAll { it == candidate }
-        return candidate.text.trim()
+        return cleanItem(candidate.text)
+    }
+
+    /**
+     * Cleans a recognized line into a dish name, or returns null if it is logo/watermark noise.
+     * Strips runs of Latin letters (e.g. a trailing "HALAL") and drops the line when no Hangul
+     * remains, or when only a stray syllable is left after stripping (e.g. "MAL사").
+     */
+    private fun cleanItem(text: String): String? {
+        val hadLatin = latinRun.containsMatchIn(text)
+        val cleaned = text.replace(latinRun, " ").replace(Regex("""\s{2,}"""), " ").trim()
+        val hangulCount = cleaned.count { it in '가'..'힣' }
+        if (hangulCount == 0) return null
+        if (hadLatin && hangulCount < 2) return null
+        return cleaned
     }
 }
