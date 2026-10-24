@@ -57,6 +57,9 @@ dependencies {
     implementation(libs.jsoup)
     implementation(libs.okhttp)
 
+    // Preferences (default cafeteria, text size, building order).
+    implementation(libs.androidx.datastore.preferences)
+
     debugImplementation(libs.androidx.ui.tooling)
     testImplementation(libs.junit)
     testImplementation(libs.okhttp.mockwebserver)

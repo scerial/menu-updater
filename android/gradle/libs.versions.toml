@@ -10,6 +10,7 @@ kotlinxSerializationJson = "1.8.0"
 kotlinxCoroutines = "1.9.0"
 jsoup = "1.18.3"
 okhttp = "4.12.0"
+datastore = "1.1.1"
 mlkitTextKorean = "16.0.1"
 androidxTestExtJunit = "1.2.1"
 androidxTestRunner = "1.6.2"
@@ -32,6 +33,7 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 okhttp-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 mlkit-text-korean = { group = "com.google.mlkit", name = "text-recognition-korean", version.ref = "mlkitTextKorean" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxTestExtJunit" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidxTestRunner" }
