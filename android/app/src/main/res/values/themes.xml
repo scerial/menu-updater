@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Smoke-test shell theme; real app theming is done in Compose.
+         Guaranteed platform theme (API 21+), no action bar. Dark mode handled in Compose later. -->
+    <style name="Theme.WeeklyMenu" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>

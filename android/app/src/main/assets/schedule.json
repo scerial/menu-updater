@@ -1,0 +1,52 @@
+{
+  "semesterLabel": "2026학년도 2학기",
+  "validFrom": "2026-08-31",
+  "validUntil": "2026-12-11",
+  "footer": "2026학년도 2학기 운영 안내(8.31–12.11) 기준이에요. 이용률에 따라 일부 바뀔 수 있어요. 문의: 학생지원팀 041-530-1033",
+  "groups": [
+    {
+      "building": "향설생활관1",
+      "venues": [
+        { "name": "조식", "weekday": [480, 600] },
+        { "name": "중식", "weekday": [660, 840], "serviceEnd": 810 },
+        { "name": "석식", "weekday": [1020, 1110], "fridayEnd": 1080 }
+      ]
+    },
+    {
+      "building": "향설생활관2",
+      "venues": [
+        { "name": "크앙분식", "weekday": [540, 1200], "fridayEnd": 900 },
+        { "name": "얼큰한 뼈해장국", "weekday": [540, 1200], "fridayEnd": 1140, "saturday": [540, 840] },
+        { "name": "또바기육개장", "weekday": [540, 1170], "saturday": [660, 930], "sunday": [660, 1110] },
+        { "name": "탕탕칼제비", "weekday": [540, 1170] }
+      ]
+    },
+    {
+      "building": "향설생활관3",
+      "venues": [
+        { "name": "향설생활관3", "isOperating": false }
+      ]
+    },
+    {
+      "building": "학생회관",
+      "venues": [
+        { "name": "대한짜장 (중식)", "weekday": [540, 1140], "fridayEnd": 1020 },
+        { "name": "수오미엔 (쌀국수)", "weekday": [600, 1170] },
+        { "name": "하즈벤 (돈까스)", "weekday": [540, 1140], "fridayEnd": 840 },
+        { "name": "공여사맛집 (덮밥)", "weekday": [480, 1140], "fridayEnd": 960 }
+      ]
+    },
+    {
+      "building": "교직원식당",
+      "venues": [
+        { "name": "중식", "weekday": [660, 840] }
+      ]
+    },
+    {
+      "building": "천안의대식당",
+      "venues": [
+        { "name": "중식", "weekday": [660, 840] }
+      ]
+    }
+  ]
+}
