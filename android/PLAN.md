@@ -2,11 +2,12 @@
 
 Working plan for porting the iOS Weekly Menu app to Android. Requirements are in `port_plan.md`; the iOS behaviour reference is `../ios/HANDOFF.md`.
 
-## Status (2026-10-22)
-- **Repo move: done on Windows.** The project moved from iCloud Drive to the private repo `scerial/menu-updater`; the Windows clone is `C:\dev\menu-updater`. First commit `331b793` on `main`.
-- **Still to do on the Mac:** clone to `~/Developer/menu-updater`, copy `ios/Sources/AppIcon.icon` and `design/IconComposer/icon.icon` in from iCloud (iCloud for Windows shows these bundles as 0-byte files), run `xcodegen generate` and the 30 unit tests, commit and push.
-- **After the Mac check passes:** rename the iCloud folder to `Menu Updater (archived – see GitHub)`. Don't delete it unless the user asks.
-- **Next:** step 1, the environment gate. Work on the `android-port` branch.
+## Status (2026-10-24)
+- **Steps 1 and 2 done** on a second Windows PC (`C:\dev\menu-updater`, `android-port` branch). Two commits: `443d040` (step 1 smoke-test baseline), `3830e5c` (step 2 OCR spike + fixtures).
+- **Step 1 — environment gate: complete.** Android Studio 2026.2.1.8 + bundled JBR 25; SDK platforms 37/36/33, build-tools 36, platform-tools, emulator, Play x86_64 images (33/36); `JAVA_HOME`/`ANDROID_HOME` set. Hyper-V present → emulator works. AVDs `phone_api36/33`, `tablet_api36/33`. Compose smoke app (Gradle 9.8.2, AGP 9.4 built-in Kotlin, Kotlin 2.4.21, Compose BOM 2026.09, **compileSdk 37**/minSdk 33) builds, unit-tests, and ran on the emulator **and** the physical **Note 20 Ultra** (SM-N986N, Android 13).
+- **Step 2 — OCR spike: complete.** ML Kit Korean (**bundled** `text-recognition-korean`) on-device: sub-second per image (597/335/309 ms on the Note 20), high accuracy. Block order is unreliable → parser must use geometry (as iOS). Fixtures committed under `app/src/test/resources/fixtures/` (board + 2 detail HTML, 3 `*.ocr.json`) and `app/src/androidTest/assets/menu_images/` (3 PNGs); `OcrSpikeTest` regenerates the JSON. See that folder's `README.md`.
+- **Next:** step 3, domain + parser (pure Kotlin, JVM tests against the OCR fixtures).
+- **Note:** the earlier "other PC" status below (162 GB, JDK 21) is a different machine; both PCs are used back and forth via git.
 
 ## Decisions made
 - Android Studio, installed via winget.
