@@ -68,6 +68,12 @@ class DishCorrector(
         .map { (word, count) -> Entry(word, jamo(word), count) }
         .groupBy { it.jamo.length }
 
+    /** True when every dish in [item] is in the lexicon, so a reading of it is probably right. */
+    fun knows(item: String): Boolean {
+        val dishes = DishSegments.dishes(item)
+        return dishes.isNotEmpty() && dishes.all { (lexicon[it] ?: 0) > 0 }
+    }
+
     fun correct(menu: WeeklyMenu): WeeklyMenu = menu.copy(tables = menu.tables.map { correct(it) })
 
     fun correct(table: MenuTable): MenuTable = table.copy(

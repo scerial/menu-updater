@@ -71,6 +71,12 @@ class OcrService {
     /** Usable directly as the [MenuRepository][com.menuupdater.weeklymenu.data.MenuRepository] recognizer. */
     val recognizer: Recognizer = { recognize(it) }
 
+    /** Two further readings of the same image; their tables vote with [recognizer]'s. */
+    val variantRecognizers: List<Recognizer> = listOf(
+        { image -> recognize(image, Preprocess.CONTRAST) },
+        { image -> recognize(image, Preprocess.NONE) },
+    )
+
     suspend fun recognize(
         image: ByteArray,
         preprocess: Preprocess = Preprocess.CONTRAST_UPSCALE,

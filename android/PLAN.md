@@ -5,7 +5,7 @@ Working plan for porting the iOS Weekly Menu app to Android. Requirements are in
 ## Handoff (2026-10-25)
 - **Everything through the OCR quality pass is committed** (`d4a1767`) and merged into `main` via PR #1.
 - **First PC set up (2026-10-25):** Android Studio 2026.2.1.8, SDK in `%LOCALAPPDATA%\Android\Sdk` (platforms 33/36/37.0 — the package is `platforms;android-37.0`, build-tools 36.0.0, platform-tools, emulator, Play x86_64 images 33/36), AVDs `phone_api36/33`, `tablet_api36/33`. `JAVA_HOME`/`ANDROID_HOME` saved as user env vars.
-- **Dish-lexicon OCR correction: built and run on the Note 20 (2026-10-25), not committed.** 49 unit tests pass. Details, the RATIO 2 decision and rebuild commands are in `app/src/main/java/com/menuupdater/weeklymenu/ocr/OCR_PLAN.md`. Step 7 verification is still open.
+- **Dish-lexicon OCR correction: built and run on the Note 20 (2026-10-25), not committed.** 49 unit tests pass. Details, the RATIO 2 decision and rebuild commands are in `app/src/main/java/com/menuupdater/weeklymenu/ocr/OCR_PLAN.md`. Runtime voting across three OCR readings is also built (`TableVoter`, see OCR_PLAN.md); 61 unit tests pass; first live load 7 s on the Note 20. Step 7 verification is still open.
 - **Devices:** Note 20 Ultra (`adb` serial `R3CN80FEZ1T`) is the main test phone. A friend's S25 Ultra is sometimes available for an extra check.
 
 ## Status (2026-10-24)

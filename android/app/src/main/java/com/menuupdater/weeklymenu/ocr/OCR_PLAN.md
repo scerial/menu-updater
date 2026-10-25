@@ -46,6 +46,13 @@ $env:BUILD_LEXICON="1"; gradlew :app:testDebugUnitTest --tests "*BuildDishLexico
 ```
 Then read `android/build/lexicon-report.txt`, update `KEEP`/`FIXES` if a real dish was rewritten, and rebuild. If the phone has this app signed by another PC's debug key, `adb uninstall com.menuupdater.weeklymenu` first.
 
+### Runtime voting (2026-10-25, not committed)
+- Each image is now read three ways (`CONTRAST_UPSCALE` as the reference, plus `CONTRAST` and `NONE`); `domain/TableVoter` keeps the spelling most readings agree on, per dish, with the reference deciding the layout. `MenuRepository(variantRecognizers = …)`, `OcrService.variantRecognizers`. The lexicon corrector runs after the vote.
+- **Measured** (`EvaluateVoting`, `EVAL_VOTING=1`, leave-one-week-out on the corpus, share of dish names the other weeks never produced): single 11.2%, lexicon only 9.4%, voting only 9.5%, voting + lexicon 8.9%. Most of the rest are genuinely new dishes.
+- **On the Note 20:** first live load 7 s end to end (board, images, 9 OCR passes). The saved menu had 214 dishes and only a new dish (상추야채겉절이) outside the lexicon.
+- Added `fixes` for 숭능/중늉 → 숭늉 and 간장돈육고기 → 간장돈육불고기 (the reader never gets 숭늉 right; a dropped syllable is out of the fixer's range).
+- Ceiling: when all three readings make the same mistake (교자민두, 사송이버섯, 부추나울) neither voting nor the lexicon can fix it. Options left are manual `fixes` or a weekly shared file produced off-device.
+
 ### Original plan (kept for reference)
 
 ### Goal

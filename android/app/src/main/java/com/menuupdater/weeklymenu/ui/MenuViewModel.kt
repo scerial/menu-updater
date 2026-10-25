@@ -36,7 +36,12 @@ class MenuViewModel(app: Application) : AndroidViewModel(app) {
         DishCorrector.fromJson(app.assets.open("dish-lexicon.json").bufferedReader().use { it.readText() })
     }.getOrNull()
 
-    private val repository = MenuRepository(recognizer = OcrService().recognizer, corrector = corrector)
+    private val ocr = OcrService()
+    private val repository = MenuRepository(
+        recognizer = ocr.recognizer,
+        variantRecognizers = ocr.variantRecognizers,
+        corrector = corrector,
+    )
 
     val schedule: Schedule =
         Schedule.fromJson(app.assets.open("schedule.json").bufferedReader().use { it.readText() })

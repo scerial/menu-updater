@@ -4,8 +4,10 @@ import com.menuupdater.weeklymenu.domain.DishCorrector
 import com.menuupdater.weeklymenu.domain.MenuSource
 import com.menuupdater.weeklymenu.domain.MenuTable
 import com.menuupdater.weeklymenu.domain.MenuTableParser
+import com.menuupdater.weeklymenu.domain.TableVoter
 import com.menuupdater.weeklymenu.domain.RecognizedLine
 import com.menuupdater.weeklymenu.domain.WeeklyMenu
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -23,6 +25,11 @@ typealias Recognizer = suspend (ByteArray) -> List<RecognizedLine>
  */
 class MenuRepository(
     private val recognizer: Recognizer,
+    /**
+     * Further readings of the same image (other preprocessing). Their tables vote with the main
+     * reading, so a letter misread in one variant is outvoted by the others. Optional.
+     */
+    private val variantRecognizers: List<Recognizer> = emptyList(),
     private val client: OkHttpClient = defaultClient(),
     private val boardUrl: String = "https://www.agoodplacefnb.com/today",
     /** Fixes OCR misreads in dish names using past menus; null leaves the OCR text as read. */
@@ -65,8 +72,22 @@ class MenuRepository(
         var firstError: Throwable? = null
         for (imageUrl in imageUrls) {
             try {
-                val lines = recognizer(fetchBytes(imageUrl))
-                MenuTableParser.parse(lines)?.let { tables.add(corrector?.correct(it) ?: it) }
+                val bytes = fetchBytes(imageUrl)
+                val readings = listOfNotNull(MenuTableParser.parse(recognizer(bytes))) +
+                    variantRecognizers.mapNotNull { variant ->
+                        // A failing extra reading only loses its vote.
+                        try {
+                            MenuTableParser.parse(variant(bytes))
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }
+                if (readings.isNotEmpty()) {
+                    val voted = TableVoter.vote(readings, isKnown = { corrector?.knows(it) ?: false })
+                    tables.add(corrector?.correct(voted) ?: voted)
+                }
             } catch (e: Throwable) {
                 if (firstError == null) firstError = e
             }

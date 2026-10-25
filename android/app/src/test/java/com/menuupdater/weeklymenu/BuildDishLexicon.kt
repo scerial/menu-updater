@@ -135,7 +135,7 @@ class BuildDishLexicon {
         return sb.toString()
     }
 
-    private companion object {
+    companion object {
         const val MIN_LEXICON_COUNT = 2
 
         // Reviewed by hand from lexicon-report.txt; carried into the JSON on every rebuild.
@@ -148,6 +148,9 @@ class BuildDishLexicon {
         /** Misreads too close to call by count (e.g. 4 reads vs 5), so they are fixed directly. */
         val FIXES = mapOf(
             "장각삼계팅" to "장각삼계탕",
+            "숭능" to "숭늉", // the reader never gets 숭늉 right
+            "중늉" to "숭늉",
+            "간장돈육고기" to "간장돈육불고기", // a dropped syllable is out of the fixer's range
         )
     }
 }

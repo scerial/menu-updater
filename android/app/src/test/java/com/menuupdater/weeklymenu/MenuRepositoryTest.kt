@@ -97,6 +97,42 @@ class MenuRepositoryTest {
         assertEquals(2, menu.tables.size)
     }
 
+    @Test
+    fun otherReadingsOutvoteAMisreadInTheMainOne() {
+        server.dispatcher = dispatcher()
+        val repository = MenuRepository(
+            recognizer = readingOf("공나물국"),
+            variantRecognizers = listOf(readingOf("콩나물국"), readingOf("콩나물국")),
+            boardUrl = url("/today"),
+        )
+        val menu = runBlocking { repository.fetchLatestMenu() }
+
+        val items = menu.tables.first().days.single().meals.single().items
+        assertEquals(listOf("콩나물국"), items)
+    }
+
+    @Test
+    fun aFailingExtraReadingOnlyLosesItsVote() {
+        server.dispatcher = dispatcher()
+        val repository = MenuRepository(
+            recognizer = readingOf("콩나물국"),
+            variantRecognizers = listOf({ error("ocr crashed") }, readingOf("콩나물국")),
+            boardUrl = url("/today"),
+        )
+        val menu = runBlocking { repository.fetchLatestMenu() }
+
+        assertEquals(2, menu.tables.size)
+        assertEquals(listOf("콩나물국"), menu.tables.first().days.single().meals.single().items)
+    }
+
+    /** A one-day, one-dish reading, like [recognizer] but with the given dish. */
+    private fun readingOf(dish: String): Recognizer = {
+        listOf(
+            RecognizedLine("10월20일(화)", Rect(0.30, 0.70, 0.10, 0.03)),
+            RecognizedLine(dish, Rect(0.30, 0.50, 0.10, 0.03)),
+        )
+    }
+
     private fun repository() = MenuRepository(
         recognizer = recognizer,
         boardUrl = url("/today"),
