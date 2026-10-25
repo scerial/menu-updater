@@ -38,6 +38,9 @@ Stable facts that are not in `ios/HANDOFF.md` or `android/PLAN.md`. Read those f
 - `gh` is at `C:\Program Files\GitHub CLI\gh.exe` (not on PATH in older shells) and signed in as `scerial`; `gh auth setup-git` is done. Commit identity: Youngmin Kim <jacobkim0707@gmail.com>.
 - In the VS Code extension, a `!` command typed in the prompt is sent as text and not run. Run interactive logins as a background task and pass the device code to the user.
 - Line endings: `.gitattributes` uses `text=auto`, so the "LF will be replaced by CRLF" warnings on Windows are expected.
+- First Windows PC (set up 2026-10-25): Android Studio and the SDK are in `%LOCALAPPDATA%\Android\Sdk`; `JAVA_HOME`/`ANDROID_HOME` are saved as user env vars (Studio's bundled JBR). AVDs: `phone_api36/33`, `tablet_api36/33`. Wifi debugging: `adb mdns services`, then `adb connect <ip:port>`; the address changes after a reconnect. A phone with the app signed by another PC's debug key needs `adb uninstall com.menuupdater.weeklymenu` before `installDebug`.
+- Gated JVM tools (set the env var, run `:app:testDebugUnitTest --tests "*Name*"`): `BUILD_LEXICON=1`, `EVAL_VOTING=1`, `EXPORT_DISHES=1`, `EVAL_TRANSLATION=1`. They read the local, uncommitted `android/ocr-corpus/` (see `ocr/OCR_PLAN.md`).
+- App name: 순대 학식 (Korean) / SCH Menu (English). The package and bundle id stay `com.menuupdater.weeklymenu`.
 ## Gotchas
 - Previews (`PreviewData.swift`) can only be rendered in the Xcode canvas, not from the command line.
 - OCR output varies between runs and can misread dish names.
