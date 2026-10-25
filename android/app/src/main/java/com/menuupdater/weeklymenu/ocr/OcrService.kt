@@ -31,16 +31,54 @@ class OcrService {
 
     private val client = TextRecognition.getClient(KoreanTextRecognizerOptions.Builder().build())
 
-    /** Usable directly as the [MenuRepository][com.menuupdater.weeklymenu.data.MenuRepository] recognizer. */
-    val recognizer: Recognizer = ::recognize
+    /**
+     * Image touch-ups applied before OCR. [CONTRAST_UPSCALE] is what the app uses: measured on the
+     * Note 20, it fixes several misreads the raw image loses (콩나물→공나물, 겉절이→걸절이, 삼계탕→삼계팅,
+     * 후라이). The other two exist so the lexicon corpus dump can read each image three ways.
+     */
+    enum class Preprocess {
+        NONE,
+        CONTRAST,
+        CONTRAST_UPSCALE;
 
-    suspend fun recognize(image: ByteArray): List<RecognizedLine> = withContext(Dispatchers.IO) {
+        fun apply(source: Bitmap): Bitmap = when (this) {
+            NONE -> source
+            CONTRAST -> contrast(source, 1.6f)
+            CONTRAST_UPSCALE -> scale(contrast(source, 1.6f), 1.5)
+        }
+
+        companion object {
+            fun contrast(source: Bitmap, c: Float): Bitmap {
+                val offset = (1f - c) / 2f * 255f
+                val matrix = ColorMatrix(
+                    floatArrayOf(
+                        c, 0f, 0f, 0f, offset,
+                        0f, c, 0f, 0f, offset,
+                        0f, 0f, c, 0f, offset,
+                        0f, 0f, 0f, 1f, 0f,
+                    ),
+                )
+                val out = Bitmap.createBitmap(source.width, source.height, Bitmap.Config.ARGB_8888)
+                Canvas(out).drawBitmap(source, 0f, 0f, Paint().apply { colorFilter = ColorMatrixColorFilter(matrix) })
+                return out
+            }
+
+            fun scale(source: Bitmap, factor: Double): Bitmap =
+                Bitmap.createScaledBitmap(source, (source.width * factor).toInt(), (source.height * factor).toInt(), true)
+        }
+    }
+
+    /** Usable directly as the [MenuRepository][com.menuupdater.weeklymenu.data.MenuRepository] recognizer. */
+    val recognizer: Recognizer = { recognize(it) }
+
+    suspend fun recognize(
+        image: ByteArray,
+        preprocess: Preprocess = Preprocess.CONTRAST_UPSCALE,
+    ): List<RecognizedLine> = withContext(Dispatchers.IO) {
         val source = BitmapFactory.decodeByteArray(image, 0, image.size)
             ?: throw MenuException(MenuError.NO_RECOGNIZED_TEXT)
-        // Measured on the Note 20: contrast + a 1.5x upscale fixes several misreads the raw image
-        // loses (콩나물→공나물, 겉절이→걸절이, 삼계탕→삼계팅, 후라이) with little cost. Boxes are normalized
-        // against this bitmap, so the upscale doesn't shift coordinates.
-        val bitmap = preprocess(source)
+        // Boxes are normalized against the processed bitmap, so an upscale doesn't shift coordinates.
+        val bitmap = preprocess.apply(source)
         val width = bitmap.width.toDouble()
         val height = bitmap.height.toDouble()
         val result = Tasks.await(client.process(InputImage.fromBitmap(bitmap, 0)))
@@ -54,22 +92,5 @@ class OcrService {
                 )
             }
             .toList()
-    }
-
-    /** Boost contrast, then upscale 1.5x — the best-measured preprocessing for this menu artwork. */
-    private fun preprocess(source: Bitmap): Bitmap {
-        val c = 1.6f
-        val offset = (1f - c) / 2f * 255f
-        val matrix = ColorMatrix(
-            floatArrayOf(
-                c, 0f, 0f, 0f, offset,
-                0f, c, 0f, 0f, offset,
-                0f, 0f, c, 0f, offset,
-                0f, 0f, 0f, 1f, 0f,
-            ),
-        )
-        val contrasted = Bitmap.createBitmap(source.width, source.height, Bitmap.Config.ARGB_8888)
-        Canvas(contrasted).drawBitmap(source, 0f, 0f, Paint().apply { colorFilter = ColorMatrixColorFilter(matrix) })
-        return Bitmap.createScaledBitmap(contrasted, (source.width * 1.5).toInt(), (source.height * 1.5).toInt(), true)
     }
 }

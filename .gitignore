@@ -29,3 +29,6 @@ captures/
 
 # Claude Code local state
 .claude/
+
+# Local OCR corpus for building the dish lexicon (regenerated on a device; not committed)
+android/ocr-corpus/

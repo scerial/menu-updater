@@ -1,5 +1,6 @@
 package com.menuupdater.weeklymenu.data
 
+import com.menuupdater.weeklymenu.domain.DishCorrector
 import com.menuupdater.weeklymenu.domain.MenuSource
 import com.menuupdater.weeklymenu.domain.MenuTable
 import com.menuupdater.weeklymenu.domain.MenuTableParser
@@ -24,6 +25,8 @@ class MenuRepository(
     private val recognizer: Recognizer,
     private val client: OkHttpClient = defaultClient(),
     private val boardUrl: String = "https://www.agoodplacefnb.com/today",
+    /** Fixes OCR misreads in dish names using past menus; null leaves the OCR text as read. */
+    private val corrector: DishCorrector? = null,
 ) {
     suspend fun fetchLatestMenu(): WeeklyMenu {
         val (university, medical) = findLatestPosts()
@@ -63,7 +66,7 @@ class MenuRepository(
         for (imageUrl in imageUrls) {
             try {
                 val lines = recognizer(fetchBytes(imageUrl))
-                MenuTableParser.parse(lines)?.let { tables.add(it) }
+                MenuTableParser.parse(lines)?.let { tables.add(corrector?.correct(it) ?: it) }
             } catch (e: Throwable) {
                 if (firstError == null) firstError = e
             }
@@ -118,7 +121,8 @@ class MenuRepository(
 
     companion object {
         // The board's "all keywords" search token; pages past the first carry it plus &page=N.
-        private const val PAGE_QUERY = "YToxOntzOjEyOiJrZXl3b3JkX3R5cGUiO3M6MzoiYWxsIjt9"
+        // Internal so the instrumented corpus dump (DishCorpusDump) can walk the same pages.
+        internal const val PAGE_QUERY = "YToxOntzOjEyOiJrZXl3b3JkX3R5cGUiO3M6MzoiYWxsIjt9"
 
         fun defaultClient(): OkHttpClient = OkHttpClient.Builder()
             .connectTimeout(20, TimeUnit.SECONDS)

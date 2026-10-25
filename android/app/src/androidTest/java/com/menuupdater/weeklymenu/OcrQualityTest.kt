@@ -14,6 +14,7 @@ import com.google.android.gms.tasks.Tasks
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions
+import com.menuupdater.weeklymenu.ocr.OcrService.Preprocess
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.File
@@ -35,13 +36,13 @@ class OcrQualityTest {
     )
 
     private val variants: List<Pair<String, (Bitmap) -> Bitmap>> = listOf(
-        "baseline" to { it },
+        "baseline" to Preprocess.NONE::apply,
         "upscale2x" to { scale(it, 2.0) },
         "gray+contrast" to { contrast(grayscale(it), 1.6f) },
         "up2x+contrast" to { scale(contrast(it, 1.6f), 2.0) },
         "up2x+gray+contr" to { scale(contrast(grayscale(it), 1.6f), 2.0) },
-        "up1_5x+contrast" to { scale(contrast(it, 1.6f), 1.5) },
-        "contrast-only" to { contrast(it, 1.6f) },
+        "up1_5x+contrast" to Preprocess.CONTRAST_UPSCALE::apply, // shipped
+        "contrast-only" to Preprocess.CONTRAST::apply,
     )
 
     @Test
@@ -87,11 +88,8 @@ class OcrQualityTest {
 
     private fun grayscale(src: Bitmap): Bitmap = applyMatrix(src, ColorMatrix().apply { setSaturation(0f) })
 
-    private fun contrast(src: Bitmap, c: Float): Bitmap {
-        val t = (1f - c) / 2f * 255f
-        val m = ColorMatrix(floatArrayOf(c, 0f, 0f, 0f, t, 0f, c, 0f, 0f, t, 0f, 0f, c, 0f, t, 0f, 0f, 0f, 1f, 0f))
-        return applyMatrix(src, m)
-    }
+    // Shared with the app; the variants only this test measures (grayscale, binarize, 2x) stay local.
+    private fun contrast(src: Bitmap, c: Float): Bitmap = Preprocess.contrast(src, c)
 
     private fun applyMatrix(src: Bitmap, matrix: ColorMatrix): Bitmap {
         val out = Bitmap.createBitmap(src.width, src.height, Bitmap.Config.ARGB_8888)
@@ -99,8 +97,7 @@ class OcrQualityTest {
         return out
     }
 
-    private fun scale(src: Bitmap, factor: Double): Bitmap =
-        Bitmap.createScaledBitmap(src, (src.width * factor).toInt(), (src.height * factor).toInt(), true)
+    private fun scale(src: Bitmap, factor: Double): Bitmap = Preprocess.scale(src, factor)
 
     private fun binarize(src: Bitmap, threshold: Int): Bitmap {
         val w = src.width

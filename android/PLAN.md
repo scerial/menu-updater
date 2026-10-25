@@ -2,18 +2,11 @@
 
 Working plan for porting the iOS Weekly Menu app to Android. Requirements are in `port_plan.md`; the iOS behaviour reference is `../ios/HANDOFF.md`.
 
-## Handoff (2026-10-24, end of session on this PC)
-- **Pushed to `origin/android-port`:** steps 3–4 `31ab9dc`, step 5 `41ee59f`, step 6 `f8338df`.
-- **Uncommitted in the working tree (on this PC only):** the OCR quality pass, made up of:
-  - `MenuTableParser` junk filter and its test;
-  - `OcrService` contrast + 1.5× preprocessing;
-  - new `app/src/androidTest/.../OcrQualityTest.kt`;
-  - new `app/src/main/java/com/menuupdater/weeklymenu/ocr/OCR_PLAN.md`;
-  - this PLAN.md update.
-  
-  These changes **must be committed and pushed from this PC before the other PC can see them.** The repo-root `2026-10-24-201520-catch-up-to-progress.txt` is a `/export` of the session and probably shouldn't be committed.
-- **Next up:** the dish-lexicon OCR correction. It's planned in full in `app/src/main/java/com/menuupdater/weeklymenu/ocr/OCR_PLAN.md`; nothing of it is implemented yet. Step 7 verification is still open after that.
-- **Device runs:** the Note 20 Ultra (`adb` serial `R3CN80FEZ1T`) is attached to *this* PC. The lexicon's corpus dump needs a physical device or an emulator.
+## Handoff (2026-10-25)
+- **Everything through the OCR quality pass is committed** (`d4a1767`) and merged into `main` via PR #1.
+- **First PC set up (2026-10-25):** Android Studio 2026.2.1.8, SDK in `%LOCALAPPDATA%\Android\Sdk` (platforms 33/36/37.0 — the package is `platforms;android-37.0`, build-tools 36.0.0, platform-tools, emulator, Play x86_64 images 33/36), AVDs `phone_api36/33`, `tablet_api36/33`. `JAVA_HOME`/`ANDROID_HOME` saved as user env vars.
+- **Dish-lexicon OCR correction: built and run on the Note 20 (2026-10-25), not committed.** 49 unit tests pass. Details, the RATIO 2 decision and rebuild commands are in `app/src/main/java/com/menuupdater/weeklymenu/ocr/OCR_PLAN.md`. Step 7 verification is still open.
+- **Devices:** Note 20 Ultra (`adb` serial `R3CN80FEZ1T`) is the main test phone. A friend's S25 Ultra is sometimes available for an extra check.
 
 ## Status (2026-10-24)
 - **Steps 1 and 2 done** on a second Windows PC (`C:\dev\menu-updater`, `android-port` branch). Two commits: `443d040` (step 1 smoke-test baseline), `3830e5c` (step 2 OCR spike + fixtures).

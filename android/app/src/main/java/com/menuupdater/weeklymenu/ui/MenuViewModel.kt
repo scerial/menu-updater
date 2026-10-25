@@ -8,6 +8,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.menuupdater.weeklymenu.data.MenuCache
 import com.menuupdater.weeklymenu.data.MenuRepository
+import com.menuupdater.weeklymenu.domain.DishCorrector
 import com.menuupdater.weeklymenu.domain.RefreshPolicy
 import com.menuupdater.weeklymenu.domain.Schedule
 import com.menuupdater.weeklymenu.domain.TextSize
@@ -29,7 +30,13 @@ import java.time.ZoneId
 class MenuViewModel(app: Application) : AndroidViewModel(app) {
     private val cache = MenuCache(app)
     private val preferences = MenuPreferences(app)
-    private val repository = MenuRepository(recognizer = OcrService().recognizer)
+
+    // A missing or unreadable lexicon just means no correction; the app works without it.
+    private val corrector: DishCorrector? = runCatching {
+        DishCorrector.fromJson(app.assets.open("dish-lexicon.json").bufferedReader().use { it.readText() })
+    }.getOrNull()
+
+    private val repository = MenuRepository(recognizer = OcrService().recognizer, corrector = corrector)
 
     val schedule: Schedule =
         Schedule.fromJson(app.assets.open("schedule.json").bufferedReader().use { it.readText() })
@@ -53,7 +60,8 @@ class MenuViewModel(app: Application) : AndroidViewModel(app) {
 
     init {
         cache.load()?.let {
-            menu = it.menu
+            // Correct the cached menu too, so existing installs get the fixes before the next refresh.
+            menu = corrector?.correct(it.menu) ?: it.menu
             lastFetchedEpochMs = it.fetchedAtEpochMs
         }
         refresh()
