@@ -32,6 +32,11 @@ android {
         compose = true
     }
 
+    // Lets JVM unit tests run code that logs (android.util.Log returns defaults instead of throwing).
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
+
     // The domain layer reads assets/schedule.json at runtime; JVM unit tests read the same
     // file from the classpath, so it stays the single source of truth for semester hours.
     sourceSets {

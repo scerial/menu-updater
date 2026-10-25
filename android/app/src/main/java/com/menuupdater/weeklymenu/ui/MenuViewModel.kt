@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.menuupdater.weeklymenu.data.MenuCache
 import com.menuupdater.weeklymenu.data.MenuRepository
 import com.menuupdater.weeklymenu.domain.DishCorrector
+import com.menuupdater.weeklymenu.domain.MenuMerge
 import com.menuupdater.weeklymenu.domain.RefreshPolicy
 import com.menuupdater.weeklymenu.domain.Schedule
 import com.menuupdater.weeklymenu.domain.TextSize
@@ -84,12 +85,16 @@ class MenuViewModel(app: Application) : AndroidViewModel(app) {
             isLoading = true
             errorMessage = null
             try {
-                val result = repository.fetchLatestMenu()
-                menu = result
+                val fresh = repository.fetchLatestMenu()
+                // A partial refresh (one image failed) must not replace a complete menu.
+                val result = MenuMerge.preferFuller(menu, fresh)
                 now = LocalDateTime.now()
-                val fetchedAt = System.currentTimeMillis()
-                lastFetchedEpochMs = fetchedAt
-                cache.save(result, fetchedAt)
+                if (result === fresh) {
+                    menu = result
+                    val fetchedAt = System.currentTimeMillis()
+                    lastFetchedEpochMs = fetchedAt
+                    cache.save(result, fetchedAt)
+                }
             } catch (e: Throwable) {
                 errorMessage = e.message ?: "메뉴를 불러오지 못했어요."
             } finally {

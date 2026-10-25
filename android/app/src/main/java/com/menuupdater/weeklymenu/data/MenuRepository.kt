@@ -1,5 +1,6 @@
 package com.menuupdater.weeklymenu.data
 
+import android.util.Log
 import com.menuupdater.weeklymenu.domain.DishCorrector
 import com.menuupdater.weeklymenu.domain.MenuSource
 import com.menuupdater.weeklymenu.domain.MenuTable
@@ -73,7 +74,8 @@ class MenuRepository(
         for (imageUrl in imageUrls) {
             try {
                 val bytes = fetchBytes(imageUrl)
-                val readings = listOfNotNull(MenuTableParser.parse(recognizer(bytes))) +
+                val mainLines = recognizer(bytes)
+                val readings = listOfNotNull(MenuTableParser.parse(mainLines)) +
                     variantRecognizers.mapNotNull { variant ->
                         // A failing extra reading only loses its vote.
                         try {
@@ -81,14 +83,17 @@ class MenuRepository(
                         } catch (e: CancellationException) {
                             throw e
                         } catch (e: Exception) {
+                            Log.w(TAG, "extra reading failed", e)
                             null
                         }
                     }
+                Log.i(TAG, "image $imageUrl: ${bytes.size} bytes, ${mainLines.size} lines, ${readings.size} readings")
                 if (readings.isNotEmpty()) {
                     val voted = TableVoter.vote(readings, isKnown = { corrector?.knows(it) ?: false })
                     tables.add(corrector?.correct(voted) ?: voted)
                 }
             } catch (e: Throwable) {
+                Log.w(TAG, "image failed: $imageUrl", e)
                 if (firstError == null) firstError = e
             }
         }
@@ -141,6 +146,7 @@ class MenuRepository(
     }
 
     companion object {
+        private const val TAG = "MenuRepository"
         // The board's "all keywords" search token; pages past the first carry it plus &page=N.
         // Internal so the instrumented corpus dump (DishCorpusDump) can walk the same pages.
         internal const val PAGE_QUERY = "YToxOntzOjEyOiJrZXl3b3JkX3R5cGUiO3M6MzoiYWxsIjt9"
