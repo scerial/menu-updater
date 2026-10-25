@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Korean is the default language. English lives in values-en/strings.xml. -->
+<resources>
+    <string name="app_name">순대 학식</string>
+
+    <!-- Tabs and headers -->
+    <string name="tab_today">오늘</string>
+    <string name="tab_week">이번 주</string>
+    <string name="tab_hours">운영 시간</string>
+    <string name="tab_settings">설정</string>
+    <string name="title_today">오늘의 메뉴</string>
+    <string name="title_week">이번 주 메뉴</string>
+
+    <!-- Menu screens -->
+    <string name="empty_today_title">오늘 메뉴가 없어요</string>
+    <string name="empty_today_detail">이 게시물에는 오늘 날짜가 없어요. 이번 주 탭을 확인해 주세요.</string>
+    <string name="empty_today_cafeteria">%1$s 메뉴에 오늘 날짜가 없어요.</string>
+    <string name="not_serving_title">이 시간에는 운영하지 않아요</string>
+    <string name="not_serving_detail">%1$s은 %2$s만 운영해요</string>
+    <string name="badge_today">오늘</string>
+    <string name="posted_on">게시일 %1$s</string>
+    <string name="open_source_post">원본 게시물 열기</string>
+    <string name="stale_banner">새로고침하지 못해 저장된 메뉴를 보여줘요.</string>
+    <string name="loading_title">메뉴를 읽는 중…</string>
+    <string name="loading_detail">처음 불러올 때는 시간이 조금 걸려요.</string>
+    <string name="error_title">메뉴를 불러올 수 없어요</string>
+    <string name="retry">다시 시도</string>
+    <string name="no_menu">메뉴가 없어요</string>
+    <string name="tap_to_switch_language">탭하면 언어를 바꿔요</string>
+
+    <!-- Load errors (MenuError) -->
+    <string name="error_no_post">순천향대학교 메뉴 게시물을 찾지 못했어요.</string>
+    <string name="error_no_images">게시물에 메뉴 이미지가 없어요.</string>
+    <string name="error_no_text">메뉴 이미지에서 글자를 읽지 못했어요.</string>
+    <string name="error_generic">메뉴를 불러오지 못했어요.</string>
+
+    <!-- Meal status pill (MealSchedule.Status) -->
+    <string name="status_upcoming">운영 예정</string>
+    <string name="status_open">운영 중</string>
+    <string name="status_closed">운영 종료</string>
+
+    <!-- Venue status in 운영 시간 (VenueStatus.Kind) -->
+    <string name="venue_not_operating">미운영</string>
+    <string name="venue_day_off">오늘 휴무</string>
+    <string name="venue_opens_at">%1$s 오픈</string>
+    <string name="venue_ended">운영 종료</string>
+    <string name="venue_closing_soon">%1$d분 후 마감</string>
+    <string name="venue_open">운영 중</string>
+
+    <!-- 운영 시간 -->
+    <string name="hours_title">운영 시간</string>
+    <string name="hours_done">완료</string>
+    <string name="hours_reorder">순서 편집</string>
+    <string name="hours_reset_order">기본 순서로</string>
+    <string name="hours_outside_notice">지금은 이 안내가 다루는 기간이 아니라서 시간이 다를 수 있어요. %1$s</string>
+
+    <!-- 설정 -->
+    <string name="settings_title">설정</string>
+    <string name="settings_subtitle">기본 식당 · 화면 · 정보</string>
+    <string name="settings_default_cafeteria">기본 식당</string>
+    <string name="settings_default_empty">메뉴를 불러오면 식당을 고를 수 있어요.</string>
+    <string name="settings_default_footer">앱을 열면 이 식당의 메뉴를 먼저 보여줘요.</string>
+    <string name="settings_display">화면</string>
+    <string name="settings_text_size">글자 크기</string>
+    <string name="size_small">작게</string>
+    <string name="size_medium">보통</string>
+    <string name="size_large">크게</string>
+    <string name="settings_about">정보</string>
+    <string name="settings_source">원본 게시물 보기</string>
+    <string name="settings_version">앱 버전</string>
+</resources>

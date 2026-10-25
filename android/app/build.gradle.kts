@@ -39,9 +39,14 @@ android {
 
     // The domain layer reads assets/schedule.json at runtime; JVM unit tests read the same
     // file from the classpath, so it stays the single source of truth for semester hours.
+    // shared/translations (en.json) is shared with iOS, so both apps read the one file.
     sourceSets {
+        getByName("main") {
+            assets.directories.add("../../shared/translations")
+        }
         getByName("test") {
             resources.directories.add("src/main/assets")
+            resources.directories.add("../../shared/translations")
         }
     }
 }

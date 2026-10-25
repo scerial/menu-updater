@@ -5,23 +5,26 @@ struct SettingsPage: View {
     let layout: ScreenLayout
     @Binding var defaultCafeteria: String
     @Binding var textSize: MenuTextSize
+    @Environment(\.tr) private var tr
 
     var body: some View {
         let cafeterias = viewModel.menu?.tables.map(\.cafeteria).filter { !$0.isEmpty } ?? []
 
         VStack(spacing: 0) {
-            ScreenHeader(subtitle: "기본 식당 · 화면 · 정보", title: "설정", layout: layout) { EmptyView() }
+            ScreenHeader(subtitle: String(localized: "기본 식당 · 화면 · 정보"), title: String(localized: "설정"),
+                         layout: layout) { EmptyView() }
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 28) {
-                    SettingsSection(title: "기본 식당",
-                                    footer: cafeterias.isEmpty ? "메뉴를 불러오면 식당을 고를 수 있어요." : "앱을 열면 이 식당의 메뉴를 먼저 보여줘요.") {
+                    SettingsSection(title: String(localized: "기본 식당"),
+                                    footer: cafeterias.isEmpty ? String(localized: "메뉴를 불러오면 식당을 고를 수 있어요.")
+                                                               : String(localized: "앱을 열면 이 식당의 메뉴를 먼저 보여줘요.")) {
                         ForEach(Array(cafeterias.enumerated()), id: \.element) { index, name in
                             if index > 0 { SettingsDivider() }
                             let isSelected = name == defaultCafeteria || (index == 0 && !cafeterias.contains(defaultCafeteria))
                             Button { defaultCafeteria = name } label: {
                                 HStack {
-                                    Text(name)
+                                    Text(tr.place(name))
                                     Spacer()
                                     if isSelected {
                                         Image(systemName: "checkmark")
@@ -36,15 +39,16 @@ struct SettingsPage: View {
                         }
                     }
 
-                    SettingsSection(title: "화면") {
+                    SettingsSection(title: String(localized: "화면")) {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("글자 크기")
                                 .appFont(17)
                             TextSizePicker(selection: $textSize)
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("제육볶음")
+                                // A sample dish, drawn like a menu card so the size tiers can be compared.
+                                Text(verbatim: tr.dish("제육볶음"))
                                     .appFont(19, .bold, menu: true)
-                                Text("쌀밥 · 된장국 · 잡채")
+                                Text(verbatim: ["쌀밥", "된장국", "잡채"].map(tr.dish).joined(separator: " · "))
                                     .appFont(15, menu: true)
                                     .foregroundStyle(Theme.secondaryText)
                             }
@@ -57,7 +61,7 @@ struct SettingsPage: View {
                         .padding(16)
                     }
 
-                    SettingsSection(title: "정보") {
+                    SettingsSection(title: String(localized: "정보")) {
                         if let url = viewModel.menu?.sourceURL {
                             Link(destination: url) {
                                 HStack {
@@ -137,7 +141,7 @@ struct TextSizePicker: View {
                 Button {
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { selection = size }
                 } label: {
-                    Text(size.label)
+                    Text(size.displayLabel)
                         .appFont(16, .bold)
                         .foregroundStyle(isSelected ? Theme.text : Theme.tertiaryText)
                         .frame(maxWidth: .infinity, minHeight: 44)

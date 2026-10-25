@@ -32,9 +32,9 @@ struct Venue: Identifiable, Equatable {
     }
 
     func status(at date: Date, calendar: Calendar = .current) -> VenueStatus {
-        guard isOperating else { return VenueStatus(level: .closed, label: "미운영", hours: nil) }
+        guard isOperating else { return VenueStatus(level: .closed, label: "미운영", hours: nil, kind: .notOperating) }
         guard let range = hours(on: date, calendar: calendar) else {
-            return VenueStatus(level: .closed, label: "오늘 휴무", hours: nil)
+            return VenueStatus(level: .closed, label: "오늘 휴무", hours: nil, kind: .dayOff)
         }
         let parts = calendar.dateComponents([.hour, .minute], from: date)
         let minute = (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
@@ -42,16 +42,18 @@ struct Venue: Identifiable, Equatable {
         let end = min(range.upperBound, serviceEnd ?? range.upperBound)
 
         if minute < range.lowerBound {
-            return VenueStatus(level: .closed, label: "\(Venue.clock(range.lowerBound)) 오픈", hours: hoursText)
+            return VenueStatus(level: .closed, label: "\(Venue.clock(range.lowerBound)) 오픈", hours: hoursText,
+                               kind: .opensAt, opensAt: Venue.clock(range.lowerBound))
         }
         if minute >= end {
-            return VenueStatus(level: .closed, label: "운영 종료", hours: hoursText)
+            return VenueStatus(level: .closed, label: "운영 종료", hours: hoursText, kind: .ended)
         }
         let remaining = end - minute
         if remaining <= Venue.closingSoonMinutes {
-            return VenueStatus(level: .closingSoon, label: "\(remaining)분 후 마감", hours: hoursText)
+            return VenueStatus(level: .closingSoon, label: "\(remaining)분 후 마감", hours: hoursText,
+                               kind: .closingSoon, minutesLeft: remaining)
         }
-        return VenueStatus(level: .open, label: "운영 중", hours: hoursText)
+        return VenueStatus(level: .open, label: "운영 중", hours: hoursText, kind: .open)
     }
 
     static let closingSoonMinutes = 30
@@ -61,12 +63,18 @@ struct Venue: Identifiable, Equatable {
     }
 }
 
+/// A venue's live status. `label` is the Korean text; views use `displayLabel`, built from `kind`
+/// (with `opensAt` or `minutesLeft`), so the status can be shown in English too.
 struct VenueStatus: Equatable {
     enum Level { case open, closingSoon, closed }
+    enum Kind { case notOperating, dayOff, opensAt, ended, closingSoon, open }
 
     let level: Level
     let label: String
     let hours: String?
+    let kind: Kind
+    var opensAt: String?
+    var minutesLeft: Int?
 }
 
 /// Source: 2026학년도 2학기 학내식당 운영 안내 (2026-08-31 ~ 12-11).
@@ -180,17 +188,16 @@ struct VenuePanel: View {
     }
 
     private func footer(at date: Date) -> String {
-        var text = "2026학년도 2학기 운영 안내(8.31–12.11) 기준이에요. 이용률에 따라 일부 바뀔 수 있어요. 문의: 학생지원팀 041-530-1033"
-        if !VenueDirectory.isWithinNotice(date) {
-            text = "지금은 이 안내가 다루는 기간이 아니라서 시간이 다를 수 있어요. " + text
-        }
-        return text
+        let text = String(localized: "2026학년도 2학기 운영 안내(8.31–12.11) 기준이에요. 이용률에 따라 일부 바뀔 수 있어요. 문의: 학생지원팀 041-530-1033")
+        if VenueDirectory.isWithinNotice(date) { return text }
+        return String(localized: "지금은 이 안내가 다루는 기간이 아니라서 시간이 다를 수 있어요. \(text)")
     }
 }
 
 struct VenueRow: View {
     let venue: Venue
     let status: VenueStatus
+    @Environment(\.tr) private var tr
 
     var body: some View {
         let isClosed = status.level == .closed
@@ -200,12 +207,12 @@ struct VenueRow: View {
                 .fill(status.level.color)
                 .frame(width: 10, height: 10)
                 .accessibilityHidden(true)
-            Text(venue.name)
+            Text(tr.venue(venue.name))
                 .appFont(17, isClosed ? .regular : .bold)
                 .foregroundStyle(isClosed ? Theme.secondaryText : Theme.text)
             Spacer(minLength: 8)
             VStack(alignment: .trailing, spacing: 0) {
-                Text(status.label)
+                Text(status.displayLabel)
                     .appFont(15, .bold)
                     .foregroundStyle(isClosed ? Theme.secondaryText : Theme.text)
                 if let hours = status.hours {
@@ -219,7 +226,7 @@ struct VenueRow: View {
         .frame(minHeight: 52)
         .opacity(isClosed ? 0.7 : 1)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(venue.name), \(status.label)\(status.hours.map { ", \($0)" } ?? "")")
+        .accessibilityLabel(Text(verbatim: "\(tr.venue(venue.name)), \(status.displayLabel)\(status.hours.map { ", \($0)" } ?? "")"))
     }
 }
 
@@ -229,12 +236,14 @@ struct HoursPage: View {
     /// Building names in the user's order, comma-separated; empty means the default order.
     @AppStorage("venue-building-order") private var savedOrder = ""
     @State private var isEditing = false
+    @Environment(\.tr) private var tr
 
     var body: some View {
         let groups = VenueDirectory.groups(orderedBy: savedOrder)
+        let notice = AppDate.range(from: VenueDirectory.validFrom, until: VenueDirectory.validUntil, english: tr.isEnglish)
 
         VStack(spacing: 0) {
-            ScreenHeader(subtitle: "2026학년도 2학기 · 8월 31일 – 12월 11일", title: "운영 시간", layout: layout,
+            ScreenHeader(subtitle: "\(String(localized: "2026학년도 2학기")) · \(notice)", title: String(localized: "운영 시간"), layout: layout,
                          trailing: AnyView(editControls)) { EmptyView() }
 
             ScrollView {
@@ -287,19 +296,20 @@ struct VenueCard: View {
     var firstBuilding: String?
     var lastBuilding: String?
     var move: (String, Int) -> Void = { _, _ in }
+    @Environment(\.tr) private var tr
 
     var body: some View {
         VStack(spacing: 0) {
             ForEach(Array(groups.enumerated()), id: \.element.building) { index, group in
                 if index > 0 { SettingsDivider() }
                 HStack {
-                    Text(group.building)
+                    Text(tr.place(group.building))
                         .appFont(14, .bold)
                         .foregroundStyle(Theme.secondaryText)
                     Spacer()
                     if isEditing {
-                        moveButton("chevron.up", "위로", group.building, -1, disabled: group.building == firstBuilding)
-                        moveButton("chevron.down", "아래로", group.building, 1, disabled: group.building == lastBuilding)
+                        moveButton("chevron.up", String(localized: "위로"), group.building, -1, disabled: group.building == firstBuilding)
+                        moveButton("chevron.down", String(localized: "아래로"), group.building, 1, disabled: group.building == lastBuilding)
                     }
                 }
                 .padding(.horizontal, 16)
@@ -325,6 +335,6 @@ struct VenueCard: View {
         }
         .buttonStyle(.plain)
         .disabled(disabled)
-        .accessibilityLabel("\(building) \(label) 이동")
+        .accessibilityLabel(String(localized: "\(tr.place(building)) \(label) 이동"))
     }
 }

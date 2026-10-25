@@ -7,12 +7,14 @@ Stable facts that are not in `ios/HANDOFF.md` or `android/PLAN.md`. Read those f
 ## Preferences and feedback
 - Keep replies short. Report outcomes plainly, including what was only build-checked and not looked at.
 - Korean UI text, friendly "~해요" tone. Text-only menus; no image fallback.
+- English follows the phone (or the per-app language in system Settings); there is no in-app toggle. In English, dishes show translated and tapping a menu card flips it to Korean. A dish missing from the dictionary gets a word-by-word guess, or stays Korean.
 - Everything runs on the device. No backend, no Tailscale.
 - iPhone is portrait only (landscape was judged not worth it). iPad supports all four orientations.
 - The overall text scale is fixed at 80%. It was chosen on a device with a temporary slider, which was then removed. The in-app size setting has three tiers: 작게 / 보통 / 크게.
 - Do not commit or push unless asked.
 
 ## Decisions and why
+- Translation is display-only: Korean stays the data and the keys (meal names drive the hours, cafeteria names match the saved default), so caches and prefs are untouched. `shared/translations/en.json` is the one dish/place dictionary for both apps; screen text lives in Android `values-en/strings.xml` and iOS `Localizable.xcstrings`.
 - Menus are OCR'd on the device with Apple Vision from the posted images, because the site only publishes images and there is no backend.
 - The 의대식당 post is merged in but fails independently, so a missing or broken 의대 post never hides the main menu.
 - Cached menu key is `cached-weekly-menu-v2`. Stored text-size raw values stay stable (-1 / 0 / 1); an unknown stored value falls back to 보통.

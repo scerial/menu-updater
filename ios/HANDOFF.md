@@ -62,3 +62,9 @@ Not yet done: testing on a physical device, and the iPad/iPhone layouts in lands
 2. Consider tolerating more layouts (weekend columns, a missing footer) and add fixtures for any new ones.
 3. Consider a small correction pass for common menu words if OCR errors are a problem in practice.
 4. App Store: suggested primary category Food & Drink; mention in the review notes that the menus come from a public page and the app links to the source post.
+
+## English translation (2026-10-26, written on Windows, not yet built)
+- New: `Sources/Translator.swift` (dish translator, `Tr` display language via `\.tr`, `AppDate`, `LanguageFlip` tap-to-flip), `Sources/Localizable.xcstrings` (Korean source, English), `Sources/InfoPlist.xcstrings` (display name 순대 학식 / SCH Menu), `Tests/TranslatorTests.swift`.
+- `project.yml`: `developmentLanguage: ko`, bundles `../shared/translations/en.json` (shared with Android), `INFOPLIST_KEY_CFBundleDisplayName`.
+- Translation is display-only; `VenueStatus.label` and `MealSchedule.Status.label` stay Korean (tests unchanged), views use `displayLabel`.
+- On the Mac: `xcodegen generate`, then `xcodebuild test`. Check the String Catalog picked up every key (Xcode marks new ones), and run the simulator with the app language set to English (Edit Scheme → Options → App Language) and Korean.

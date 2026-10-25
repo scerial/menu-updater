@@ -8,7 +8,10 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.menuupdater.weeklymenu.data.MenuCache
 import com.menuupdater.weeklymenu.data.MenuRepository
+import com.menuupdater.weeklymenu.data.MenuError
+import com.menuupdater.weeklymenu.data.MenuException
 import com.menuupdater.weeklymenu.domain.DishCorrector
+import com.menuupdater.weeklymenu.domain.Translator
 import com.menuupdater.weeklymenu.domain.MenuMerge
 import com.menuupdater.weeklymenu.domain.RefreshPolicy
 import com.menuupdater.weeklymenu.domain.Schedule
@@ -44,6 +47,11 @@ class MenuViewModel(app: Application) : AndroidViewModel(app) {
         corrector = corrector,
     )
 
+    /** English for dishes and places (shared/translations/en.json); used only when the app is in English. */
+    val translator: Translator? = runCatching {
+        Translator.fromJson(app.assets.open("en.json").bufferedReader().use { it.readText() })
+    }.getOrNull()
+
     val schedule: Schedule =
         Schedule.fromJson(app.assets.open("schedule.json").bufferedReader().use { it.readText() })
 
@@ -51,7 +59,8 @@ class MenuViewModel(app: Application) : AndroidViewModel(app) {
         private set
     var isLoading by mutableStateOf(false)
         private set
-    var errorMessage by mutableStateOf<String?>(null)
+    /** Why the last load failed, or null. The screens word it in the current language. */
+    var error by mutableStateOf<MenuError?>(null)
         private set
 
     /** The instant the views treat as "now"; refreshed when the app comes to the foreground. */
@@ -83,7 +92,7 @@ class MenuViewModel(app: Application) : AndroidViewModel(app) {
         if (isLoading) return
         viewModelScope.launch {
             isLoading = true
-            errorMessage = null
+            error = null
             try {
                 val fresh = repository.fetchLatestMenu()
                 // A partial refresh (one image failed) must not replace a complete menu.
@@ -96,7 +105,7 @@ class MenuViewModel(app: Application) : AndroidViewModel(app) {
                     cache.save(result, fetchedAt)
                 }
             } catch (e: Throwable) {
-                errorMessage = e.message ?: "메뉴를 불러오지 못했어요."
+                error = (e as? MenuException)?.error ?: MenuError.LOAD_FAILED
             } finally {
                 isLoading = false
             }

@@ -31,7 +31,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.menuupdater.weeklymenu.R
 import com.menuupdater.weeklymenu.domain.Venue
 import com.menuupdater.weeklymenu.domain.VenueGroup
 import com.menuupdater.weeklymenu.domain.VenueStatus
@@ -55,21 +57,25 @@ fun HoursScreen(viewModel: MenuViewModel, layout: ScreenLayout) {
     }
 
     val groups = viewModel.schedule.groups(orderedBy = savedOrder)
+    val schedule = viewModel.schedule
+    val english = LocalTr.current.isEnglish
+    val semester = if (english) schedule.semesterLabelEn ?: schedule.semesterLabel else schedule.semesterLabel
+    val footer = if (english) schedule.footerEn ?: schedule.footer else schedule.footer
 
     Column(Modifier.fillMaxSize()) {
         ScreenHeader(
-            subtitle = "${viewModel.schedule.semesterLabel} · 8월 31일 – 12월 11일",
-            title = "운영 시간",
+            subtitle = "$semester · ${AppDate.range(schedule.from, schedule.until, english)}",
+            title = stringResource(R.string.hours_title),
             layout = layout,
             trailing = {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                     AppText(
-                        if (isEditing) "완료" else "순서 편집", 16, Bold, color = colors.accent,
+                        stringResource(if (isEditing) R.string.hours_done else R.string.hours_reorder), 16, Bold, color = colors.accent,
                         modifier = Modifier.clickable { isEditing = !isEditing },
                     )
                     if (isEditing && savedOrder.isNotEmpty()) {
                         AppText(
-                            "기본 순서로", 16, color = colors.secondaryText,
+                            stringResource(R.string.hours_reset_order), 16, color = colors.secondaryText,
                             modifier = Modifier.clickable { viewModel.setBuildingOrder("") },
                         )
                     }
@@ -92,13 +98,13 @@ fun HoursScreen(viewModel: MenuViewModel, layout: ScreenLayout) {
                 isEditing = isEditing,
                 move = { building, offset -> moveBuilding(viewModel, groups, building, offset) },
             )
-            AppText(footerText(viewModel.schedule.footer, viewModel.schedule.isWithinNotice(now.toLocalDate())), 13, color = colors.secondaryText, modifier = Modifier.padding(horizontal = 4.dp))
+            AppText(
+                if (schedule.isWithinNotice(now.toLocalDate())) footer else stringResource(R.string.hours_outside_notice, footer),
+                13, color = colors.secondaryText, modifier = Modifier.padding(horizontal = 4.dp),
+            )
         }
     }
 }
-
-private fun footerText(base: String, withinNotice: Boolean): String =
-    if (withinNotice) base else "지금은 이 안내가 다루는 기간이 아니라서 시간이 다를 수 있어요. $base"
 
 private fun moveBuilding(viewModel: MenuViewModel, groups: List<VenueGroup>, building: String, offset: Int) {
     val names = groups.map { it.building }.toMutableList()
@@ -147,7 +153,7 @@ private fun VenueCard(
                 Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(top = 12.dp, bottom = 2.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                AppText(group.building, 14, Bold, color = colors.secondaryText, modifier = Modifier.weight(1f))
+                AppText(LocalTr.current.place(group.building), 14, Bold, color = colors.secondaryText, modifier = Modifier.weight(1f))
                 if (isEditing) {
                     MoveButton("▲", group.building, -1, disabled = group.building == firstBuilding, move)
                     MoveButton("▼", group.building, 1, disabled = group.building == lastBuilding, move)
@@ -189,12 +195,12 @@ private fun VenueRow(venue: Venue, status: VenueStatus) {
     ) {
         Box(Modifier.size(10.dp).background(dot, CircleShape))
         AppText(
-            venue.name, 17, if (isClosed) Regular else Bold,
+            LocalTr.current.venue(venue.name), 17, if (isClosed) Regular else Bold,
             color = if (isClosed) colors.secondaryText else colors.text,
             modifier = Modifier.weight(1f),
         )
         Column(horizontalAlignment = Alignment.End) {
-            AppText(status.label, 15, Bold, color = if (isClosed) colors.secondaryText else colors.text)
+            AppText(venueStatusText(status), 15, Bold, color = if (isClosed) colors.secondaryText else colors.text)
             status.hours?.let { AppText(it, 13, color = colors.secondaryText) }
         }
     }

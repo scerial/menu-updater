@@ -32,6 +32,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
+import com.menuupdater.weeklymenu.R
+import com.menuupdater.weeklymenu.data.MenuError
 import com.menuupdater.weeklymenu.domain.TextSize
 import com.menuupdater.weeklymenu.domain.WeeklyMenu
 
@@ -69,7 +73,11 @@ fun MenuApp(viewModel: MenuViewModel) {
         else -> names.firstOrNull() ?: ""
     }
 
-    CompositionLocalProvider(LocalMenuTextScale provides textSize.menuScale) {
+    // English when the phone (or this app's language in system Settings) is English.
+    val english = LocalConfiguration.current.locales[0].language == "en"
+    val tr = remember(english, viewModel.translator) { if (english) Tr(viewModel.translator) else Tr.Korean }
+
+    CompositionLocalProvider(LocalMenuTextScale provides textSize.menuScale, LocalTr provides tr) {
         BoxWithConstraints(
             Modifier
                 .fillMaxSize()
@@ -106,14 +114,14 @@ private fun Page(
 ) {
     when (tab) {
         AppTab.TODAY -> MenuScreen(
-            viewModel, layout, title = "오늘의 메뉴",
-            subtitle = KoreanDate.full(viewModel.now.toLocalDate()),
+            viewModel, layout, title = stringResource(R.string.title_today),
+            subtitle = AppDate.full(viewModel.now.toLocalDate(), LocalTr.current.isEnglish),
             cafeteria = cafeteria, onSelectCafeteria = onSelectCafeteria,
         ) { menu, caf -> TodayPage(viewModel, menu, caf, layout) }
 
         AppTab.WEEK -> MenuScreen(
-            viewModel, layout, title = "이번 주 메뉴",
-            subtitle = viewModel.menu?.let { KoreanDate.range(it.tables.flatMap { t -> t.days }) }.orEmpty(),
+            viewModel, layout, title = stringResource(R.string.title_week),
+            subtitle = viewModel.menu?.let { AppDate.range(it.tables.flatMap { t -> t.days }, LocalTr.current.isEnglish) }.orEmpty(),
             cafeteria = cafeteria, onSelectCafeteria = onSelectCafeteria,
         ) { menu, caf -> WeekPage(viewModel, menu, caf, layout) }
 
@@ -148,7 +156,7 @@ private fun BottomTabBar(selection: AppTab, onSelect: (AppTab) -> Unit) {
                 ) {
                     TabIcon(tab, 22, tint)
                     Spacer(Modifier.height(4.dp))
-                    AppText(tab.label, 13, if (selected) Bold else Regular, color = tint)
+                    AppText(stringResource(tab.labelRes), 13, if (selected) Bold else Regular, color = tint)
                 }
             }
         }
@@ -176,7 +184,7 @@ private fun Sidebar(selection: AppTab, onSelect: (AppTab) -> Unit) {
                     Modifier.size(40.dp).background(colors.accent, RoundedCornerShape(12.dp)),
                     contentAlignment = Alignment.Center,
                 ) { TabIcon(AppTab.TODAY, 24, Color.White) }
-                AppText("학식 메뉴", 22, Bold)
+                AppText(stringResource(R.string.app_name), 22, Bold)
             }
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 for (tab in AppTab.entries) {
@@ -192,7 +200,7 @@ private fun Sidebar(selection: AppTab, onSelect: (AppTab) -> Unit) {
                         horizontalArrangement = Arrangement.spacedBy(14.dp),
                     ) {
                         TabIcon(tab, 21, if (selected) Color.White else colors.tertiaryText)
-                        AppText(tab.label, 19, Bold, color = if (selected) Color.White else colors.tertiaryText)
+                        AppText(stringResource(tab.labelRes), 19, Bold, color = if (selected) Color.White else colors.tertiaryText)
                     }
                 }
             }
@@ -272,8 +280,8 @@ fun MenuScreen(
         when {
             menu != null -> content(menu, cafeteria)
             viewModel.isLoading -> LoadingState()
-            viewModel.errorMessage != null -> ErrorState(viewModel.errorMessage!!) { viewModel.refresh() }
-            else -> CenterMessage("메뉴가 없어요")
+            viewModel.error != null -> ErrorState(viewModel.error!!) { viewModel.refresh() }
+            else -> CenterMessage(stringResource(R.string.no_menu))
         }
     }
 }
@@ -298,7 +306,7 @@ fun CafeteriaPicker(names: List<String>, selection: String, onSelect: (String) -
                 contentAlignment = Alignment.Center,
             ) {
                 AppText(
-                    name, 17, Bold,
+                    LocalTr.current.place(name), 17, Bold,
                     color = if (selected) Color.White else colors.tertiaryText,
                     maxLines = 1,
                     modifier = Modifier.padding(horizontal = 4.dp),
@@ -318,30 +326,30 @@ private fun LoadingState() {
     ) {
         CircularProgressIndicator(color = colors.accent)
         Spacer(Modifier.height(12.dp))
-        AppText("메뉴를 읽는 중…", 17, Bold)
+        AppText(stringResource(R.string.loading_title), 17, Bold)
         Spacer(Modifier.height(4.dp))
-        AppText("처음 불러올 때는 시간이 조금 걸려요.", 15, color = colors.secondaryText)
+        AppText(stringResource(R.string.loading_detail), 15, color = colors.secondaryText)
     }
 }
 
 @Composable
-private fun ErrorState(message: String, onRetry: () -> Unit) {
+private fun ErrorState(error: MenuError, onRetry: () -> Unit) {
     val colors = LocalMenuColors.current
     Column(
         Modifier.fillMaxSize().padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        AppText("메뉴를 불러올 수 없어요", 20, Bold)
+        AppText(stringResource(R.string.error_title), 20, Bold)
         Spacer(Modifier.height(8.dp))
-        AppText(message, 15, color = colors.secondaryText)
+        AppText(menuErrorText(error), 15, color = colors.secondaryText)
         Spacer(Modifier.height(16.dp))
         Box(
             Modifier
                 .background(colors.accent, RoundedCornerShape(12.dp))
                 .clickable { onRetry() }
                 .padding(horizontal = 20.dp, vertical = 12.dp),
-        ) { AppText("다시 시도", 16, Bold, color = Color.White) }
+        ) { AppText(stringResource(R.string.retry), 16, Bold, color = Color.White) }
     }
 }
 

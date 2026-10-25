@@ -46,9 +46,9 @@ enum MenuError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .noEligiblePost: return "순천향대학교 메뉴 게시물을 찾지 못했어요."
-        case .noMenuImages: return "게시물에 메뉴 이미지가 없어요."
-        case .noRecognizedText: return "메뉴 이미지에서 글자를 읽지 못했어요."
+        case .noEligiblePost: return String(localized: "순천향대학교 메뉴 게시물을 찾지 못했어요.")
+        case .noMenuImages: return String(localized: "게시물에 메뉴 이미지가 없어요.")
+        case .noRecognizedText: return String(localized: "메뉴 이미지에서 글자를 읽지 못했어요.")
         }
     }
 }

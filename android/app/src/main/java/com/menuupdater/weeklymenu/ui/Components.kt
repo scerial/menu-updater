@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -29,12 +30,8 @@ import androidx.compose.material3.Text
 import com.menuupdater.weeklymenu.R
 import com.menuupdater.weeklymenu.domain.MealSchedule
 import com.menuupdater.weeklymenu.domain.MealSection
-import com.menuupdater.weeklymenu.domain.MenuDay
 import com.menuupdater.weeklymenu.domain.MenuTable
 import com.menuupdater.weeklymenu.domain.VenueStatus
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 // MARK: - Text
 
@@ -63,11 +60,11 @@ fun AppText(
 
 // MARK: - Tabs
 
-enum class AppTab(val label: String, val iconRes: Int) {
-    TODAY("오늘", R.drawable.ic_tray),
-    WEEK("이번 주", R.drawable.ic_calendar),
-    HOURS("운영 시간", R.drawable.ic_clock),
-    SETTINGS("설정", R.drawable.ic_settings),
+enum class AppTab(val labelRes: Int, val iconRes: Int) {
+    TODAY(R.string.tab_today, R.drawable.ic_tray),
+    WEEK(R.string.tab_week, R.drawable.ic_calendar),
+    HOURS(R.string.tab_hours, R.drawable.ic_clock),
+    SETTINGS(R.string.tab_settings, R.drawable.ic_settings),
 }
 
 @Composable
@@ -88,7 +85,7 @@ fun StatusPill(status: MealSchedule.Status) {
     val isOpen = status == MealSchedule.Status.OPEN
     val isClosed = status == MealSchedule.Status.CLOSED
     AppText(
-        text = status.label,
+        text = mealStatusText(status),
         size = 14,
         weight = Bold,
         color = if (isOpen) Color.White else if (isClosed) colors.secondaryText else colors.text,
@@ -158,8 +155,8 @@ fun SourceFooter(sources: List<com.menuupdater.weeklymenu.domain.MenuSource>, mo
         for (source in sources) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 AppText(source.title, 13, color = colors.secondaryText)
-                AppText("게시일 ${source.postedAt}", 13, color = colors.secondaryText)
-                LinkText("원본 게시물 열기", source.url)
+                AppText(stringResource(R.string.posted_on, source.postedAt), 13, color = colors.secondaryText)
+                LinkText(stringResource(R.string.open_source_post), source.url)
             }
         }
     }
@@ -175,7 +172,7 @@ fun StaleMenuBanner(message: String, modifier: Modifier = Modifier) {
             .padding(12.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-        AppText("새로고침하지 못해 저장된 메뉴를 보여줘요.", 15, Bold)
+        AppText(stringResource(R.string.stale_banner), 15, Bold)
         AppText(message, 13, color = colors.secondaryText)
     }
 }
@@ -206,23 +203,6 @@ val MenuTable.mealNames: List<String>
         return seen.toList()
     }
 
-/** "중식 · 11:00–14:00", or just the meal name when hours aren't known. */
-val MealSection.timeLabel: String
-    get() = MealSchedule.hoursLabel(name)?.let { "$name · $it" } ?: name
-
-object KoreanDate {
-    private val full = DateTimeFormatter.ofPattern("M월 d일 EEEE", Locale.KOREAN)
-
-    /** "10월 21일 수요일" */
-    fun full(date: LocalDate): String = date.format(full)
-
-    /** "10월 19일 – 10월 23일" for the span a post covers. */
-    fun range(days: List<MenuDay>): String? {
-        val sorted = days.sortedBy { it.month * 100 + it.day }
-        val first = sorted.firstOrNull() ?: return null
-        val last = sorted.last()
-        val start = "${first.month}월 ${first.day}일"
-        return if (first === last || (first.month == last.month && first.day == last.day)) start
-        else "$start – ${last.month}월 ${last.day}일"
-    }
-}
+/** "중식 · 11:00–14:00" ("Lunch · 11:00–14:00"), or just the meal name when hours aren't known. */
+fun MealSection.timeLabel(tr: Tr): String =
+    MealSchedule.hoursLabel(name)?.let { "${tr.meal(name)} · $it" } ?: tr.meal(name)

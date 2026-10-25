@@ -23,7 +23,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.menuupdater.weeklymenu.R
 import com.menuupdater.weeklymenu.domain.TextSize
 
 @Composable
@@ -34,8 +36,10 @@ fun SettingsScreen(viewModel: MenuViewModel, layout: ScreenLayout) {
     val textSize by viewModel.textSize.collectAsState()
     val cafeterias = viewModel.menu?.tables?.map { it.cafeteria }?.filter { it.isNotEmpty() }.orEmpty()
 
+    val tr = LocalTr.current
+
     Column(Modifier.fillMaxSize()) {
-        ScreenHeader(subtitle = "기본 식당 · 화면 · 정보", title = "설정", layout = layout)
+        ScreenHeader(subtitle = stringResource(R.string.settings_subtitle), title = stringResource(R.string.settings_title), layout = layout)
 
         Column(
             Modifier
@@ -46,8 +50,8 @@ fun SettingsScreen(viewModel: MenuViewModel, layout: ScreenLayout) {
             verticalArrangement = Arrangement.spacedBy(28.dp),
         ) {
             SettingsSection(
-                title = "기본 식당",
-                footer = if (cafeterias.isEmpty()) "메뉴를 불러오면 식당을 고를 수 있어요." else "앱을 열면 이 식당의 메뉴를 먼저 보여줘요.",
+                title = stringResource(R.string.settings_default_cafeteria),
+                footer = stringResource(if (cafeterias.isEmpty()) R.string.settings_default_empty else R.string.settings_default_footer),
             ) {
                 cafeterias.forEachIndexed { index, name ->
                     if (index > 0) SettingsDivider()
@@ -60,15 +64,15 @@ fun SettingsScreen(viewModel: MenuViewModel, layout: ScreenLayout) {
                             .padding(horizontal = 16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        AppText(name, 17, modifier = Modifier.weight(1f))
+                        AppText(tr.place(name), 17, modifier = Modifier.weight(1f))
                         if (isSelected) AppText("✓", 17, Bold, color = colors.accent)
                     }
                 }
             }
 
-            SettingsSection(title = "화면") {
+            SettingsSection(title = stringResource(R.string.settings_display)) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    AppText("글자 크기", 17)
+                    AppText(stringResource(R.string.settings_text_size), 17)
                     TextSizePicker(textSize) { viewModel.setTextSize(it) }
                     Column(
                         Modifier
@@ -77,13 +81,14 @@ fun SettingsScreen(viewModel: MenuViewModel, layout: ScreenLayout) {
                             .padding(horizontal = 16.dp, vertical = 14.dp),
                         verticalArrangement = Arrangement.spacedBy(2.dp),
                     ) {
-                        AppText("제육볶음", 19, Bold, menu = true)
-                        AppText("쌀밥 · 된장국 · 잡채", 15, menu = true, color = colors.secondaryText)
+                        // A sample dish, drawn like a menu card so the size tiers can be compared.
+                        AppText(tr.dish("제육볶음"), 19, Bold, menu = true)
+                        AppText(listOf("쌀밥", "된장국", "잡채").joinToString(" · ") { tr.dish(it) }, 15, menu = true, color = colors.secondaryText)
                     }
                 }
             }
 
-            SettingsSection(title = "정보") {
+            SettingsSection(title = stringResource(R.string.settings_about)) {
                 viewModel.menu?.sourceURL?.let { url ->
                     Row(
                         Modifier
@@ -99,7 +104,7 @@ fun SettingsScreen(viewModel: MenuViewModel, layout: ScreenLayout) {
                             .padding(horizontal = 16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        AppText("원본 게시물 보기", 17, modifier = Modifier.weight(1f))
+                        AppText(stringResource(R.string.settings_source), 17, modifier = Modifier.weight(1f))
                         AppText("›", 17, color = colors.secondaryText)
                     }
                     SettingsDivider()
@@ -108,7 +113,7 @@ fun SettingsScreen(viewModel: MenuViewModel, layout: ScreenLayout) {
                     Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    AppText("앱 버전", 17, modifier = Modifier.weight(1f))
+                    AppText(stringResource(R.string.settings_version), 17, modifier = Modifier.weight(1f))
                     AppText(appVersion(context), 17, color = colors.secondaryText)
                 }
             }
@@ -149,7 +154,7 @@ private fun TextSizePicker(selection: TextSize, onSelect: (TextSize) -> Unit) {
                     .clickable { onSelect(size) },
                 contentAlignment = Alignment.Center,
             ) {
-                AppText(size.label, 16, Bold, color = if (selected) colors.text else colors.tertiaryText)
+                AppText(textSizeLabel(size), 16, Bold, color = if (selected) colors.text else colors.tertiaryText)
             }
         }
     }
