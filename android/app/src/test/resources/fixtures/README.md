@@ -4,10 +4,14 @@ Captured from the live site on 2026-10-23/24 for the Android port. Source:
 https://www.agoodplacefnb.com/today (Imweb board `t=board`).
 
 ## Board / detail HTML (repository tests — step 4)
-- `board_page1.html` — board list page 1. Rows `ul.li_body`, title `a.list_text_title`,
+Trimmed to the markup `BoardParser` reads: the full pages were about 900 KB, these are about 16 KB.
+The elements are kept verbatim; scripts, styles, navigation and everything else were dropped.
+- `board_page1.html` — the 10 `ul.li_body` rows of board list page 1. Title `a.list_text_title`,
   date in `li.time title="YYYY-MM-DD HH:MM"`. Post links: `/today/?q=<base64>&bmode=view&idx=<idx>&t=board`.
-- `detail_university_175120835.html` — newest "순천향대학교 식단" post (2026-10-16).
-- `detail_medical_175120850.html` — newest "순천향대학교 의과대학 식단" post (2026-10-16).
+- `detail_university_175120835.html` — every `img` of the newest "순천향대학교 식단" post (2026-10-16).
+- `detail_medical_175120850.html` — every `img` of the newest "순천향대학교 의과대학 식단" post (2026-10-16).
+
+If the parser starts reading more of the page, capture a fresh page and keep the extra elements too.
 
 Post selection matches iOS: newest title containing `순천향대학교` and NOT `의과대학`, plus
 newest containing `의과대학`. Menu images are `cdn.imweb.me/upload/.../*.png`; the shared
