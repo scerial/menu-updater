@@ -28,6 +28,9 @@ Not yet done: testing on a physical device, and the iPad/iPhone layouts in lands
 - **Previews:** `Sources/PreviewData.swift` (`#if DEBUG`) has sample data from real posts, a preview-only `MenuViewModel` init and 16 `#Preview`s (iPhone Today states, Week, 운영 시간, Settings, iPad landscape/portrait). They have not been rendered by the agent; check them in the Xcode canvas.
 - 30 unit tests passed on the last full run; the header, icon and tray changes after it were build-checked only.
 
+### Update 2026-10-26
+- **Board date fix (iOS only):** recent posts show a relative time ("3시간전") in the row text, so the `yyyy-MM-dd` regex found nothing and those posts were skipped. `MenuRepository` now reads the date from `li.time`'s `title` first, then falls back to the row text. Merged from `claude/ios-menu-update-issue-zf8z44`. Android does not have this bug (confirmed by the user), so `BoardParser.kt` needs no change.
+
 ## Files
 - `project.yml`: XcodeGen manifest; iOS 17.0, SwiftSoup dependency, app and unit-test targets.
 - `Sources/WeeklyMenuApp.swift`: app entry and the `@Observable` view model (load, refresh, foreground refresh, cache).
