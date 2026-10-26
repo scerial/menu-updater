@@ -137,7 +137,7 @@ class MenuRepository(
     private suspend fun fetchBytes(url: String): ByteArray = withContext(Dispatchers.IO) {
         val request = Request.Builder()
             .url(url)
-            .header("User-Agent", "Mozilla/5.0 WeeklyMenuApp")
+            .header("User-Agent", "Mozilla/5.0 (compatible; SCHMenu; +https://scerial.github.io/menu-updater/privacy/)")
             .build()
         client.newCall(request).execute().use { response ->
             if (!response.isSuccessful) throw IOException("HTTP ${response.code} for $url")

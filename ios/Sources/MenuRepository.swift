@@ -155,7 +155,7 @@ struct MenuRepository {
     private func fetchData(_ url: URL) async throws -> Data {
         var request = URLRequest(url: url)
         request.timeoutInterval = 20
-        request.setValue("Mozilla/5.0 WeeklyMenuApp", forHTTPHeaderField: "User-Agent")
+        request.setValue("Mozilla/5.0 (compatible; SCHMenu; +https://scerial.github.io/menu-updater/privacy/)", forHTTPHeaderField: "User-Agent")
         let (data, response) = try await session.data(for: request)
         guard let response = response as? HTTPURLResponse,
               (200..<300).contains(response.statusCode) else {

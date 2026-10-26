@@ -18,8 +18,23 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // Upload key lives outside the repo; its path and password come from ~/.gradle/gradle.properties.
+    // Without them the release build is simply left unsigned.
+    signingConfigs {
+        val storePath = providers.gradleProperty("SOONMENU_UPLOAD_STORE_FILE").orNull
+        if (storePath != null) {
+            create("upload") {
+                storeFile = file(storePath)
+                storePassword = providers.gradleProperty("SOONMENU_UPLOAD_PASSWORD").get()
+                keyAlias = "upload"
+                keyPassword = providers.gradleProperty("SOONMENU_UPLOAD_PASSWORD").get()
+            }
+        }
+    }
+
     buildTypes {
         release {
+            signingConfigs.findByName("upload")?.let { signingConfig = it }
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

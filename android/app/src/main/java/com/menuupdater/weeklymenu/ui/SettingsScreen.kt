@@ -88,7 +88,7 @@ fun SettingsScreen(viewModel: MenuViewModel, layout: ScreenLayout) {
                 }
             }
 
-            SettingsSection(title = stringResource(R.string.settings_about)) {
+            SettingsSection(title = stringResource(R.string.settings_about), footer = stringResource(R.string.settings_about_footer)) {
                 viewModel.menu?.sourceURL?.let { url ->
                     Row(
                         Modifier
@@ -109,6 +109,25 @@ fun SettingsScreen(viewModel: MenuViewModel, layout: ScreenLayout) {
                     }
                     SettingsDivider()
                 }
+                val privacyUrl = stringResource(R.string.settings_privacy_url)
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 56.dp)
+                        .clickable {
+                            runCatching {
+                                context.startActivity(
+                                    android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(privacyUrl)),
+                                )
+                            }
+                        }
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    AppText(stringResource(R.string.settings_privacy), 17, modifier = Modifier.weight(1f))
+                    AppText("›", 17, color = colors.secondaryText)
+                }
+                SettingsDivider()
                 Row(
                     Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,

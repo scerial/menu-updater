@@ -20,6 +20,7 @@
     <string name="badge_today">Today</string>
     <string name="posted_on">Posted %1$s</string>
     <string name="open_source_post">Open the original post</string>
+    <string name="ocr_disclaimer">Menus are read from the posted images by text recognition, so they can contain mistakes. Check the original post for allergy and origin information.</string>
     <string name="stale_banner">Couldn\'t refresh, so this is the saved menu.</string>
     <string name="loading_title">Reading the menu…</string>
     <string name="loading_detail">The first load takes a little while.</string>
@@ -67,5 +68,8 @@
     <string name="size_large">Large</string>
     <string name="settings_about">About</string>
     <string name="settings_source">View the original post</string>
+    <string name="settings_privacy">Privacy Policy</string>
+    <string name="settings_about_footer">An unofficial app, not affiliated with Soonchunhyang University or the cafeteria operator. Menu text recognition (Google ML Kit) may send diagnostic data to Google.</string>
+    <string name="settings_privacy_url" translatable="false">https://scerial.github.io/menu-updater/privacy/#en</string>
     <string name="settings_version">App Version</string>
 </resources>

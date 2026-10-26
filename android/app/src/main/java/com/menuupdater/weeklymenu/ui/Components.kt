@@ -159,6 +159,7 @@ fun SourceFooter(sources: List<com.menuupdater.weeklymenu.domain.MenuSource>, mo
                 LinkText(stringResource(R.string.open_source_post), source.url)
             }
         }
+        AppText(stringResource(R.string.ocr_disclaimer), 13, color = colors.secondaryText)
     }
 }
 

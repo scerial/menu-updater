@@ -20,6 +20,7 @@
     <string name="badge_today">오늘</string>
     <string name="posted_on">게시일 %1$s</string>
     <string name="open_source_post">원본 게시물 열기</string>
+    <string name="ocr_disclaimer">메뉴는 게시된 이미지를 글자 인식해서 만들기 때문에 틀릴 수 있어요. 알레르기·원산지 정보는 원본 게시물에서 확인해 주세요.</string>
     <string name="stale_banner">새로고침하지 못해 저장된 메뉴를 보여줘요.</string>
     <string name="loading_title">메뉴를 읽는 중…</string>
     <string name="loading_detail">처음 불러올 때는 시간이 조금 걸려요.</string>
@@ -67,5 +68,8 @@
     <string name="size_large">크게</string>
     <string name="settings_about">정보</string>
     <string name="settings_source">원본 게시물 보기</string>
+    <string name="settings_privacy">개인정보 처리방침</string>
+    <string name="settings_about_footer">순천향대학교·식당 운영사와 관련 없는 비공식 앱이에요. 메뉴 글자 인식(Google ML Kit)이 진단 정보를 Google에 보낼 수 있어요.</string>
+    <string name="settings_privacy_url" translatable="false">https://scerial.github.io/menu-updater/privacy/#ko</string>
     <string name="settings_version">앱 버전</string>
 </resources>
