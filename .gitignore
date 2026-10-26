@@ -22,6 +22,19 @@ captures/
 *.keystore
 *.jks
 .kotlin/
+keystore.properties
+key.properties
+google-services.json
+
+# Signing and credential material
+*.p12
+*.pem
+*.mobileprovision
+.env
+.env.*
+
+# Exported agent sessions (e.g. 2026-10-24-201520-catch-up-to-progress.txt)
+/20??-??-??-*.txt
 
 # Android Studio / IntelliJ (shared run configs and code style can be added back explicitly)
 .idea/

@@ -13,7 +13,7 @@ Working plan for porting the iOS Weekly Menu app to Android. Requirements are in
   
   These changes **must be committed and pushed from this PC before the other PC can see them.** The repo-root `2026-10-24-201520-catch-up-to-progress.txt` is a `/export` of the session and probably shouldn't be committed.
 - **Next up:** the dish-lexicon OCR correction. It's planned in full in `app/src/main/java/com/menuupdater/weeklymenu/ocr/OCR_PLAN.md`; nothing of it is implemented yet. Step 7 verification is still open after that.
-- **Device runs:** the Note 20 Ultra (`adb` serial `R3CN80FEZ1T`) is attached to *this* PC. The lexicon's corpus dump needs a physical device or an emulator.
+- **Device runs:** the Note 20 Ultra is attached to *this* PC. The lexicon's corpus dump needs a physical device or an emulator.
 
 ## Status (2026-10-24)
 - **Steps 1 and 2 done** on a second Windows PC (`C:\dev\menu-updater`, `android-port` branch). Two commits: `443d040` (step 1 smoke-test baseline), `3830e5c` (step 2 OCR spike + fixtures).
@@ -34,8 +34,8 @@ Working plan for porting the iOS Weekly Menu app to Android. Requirements are in
 
 ## Decisions made
 - Android Studio, installed via winget.
-- Commit identity: Youngmin Kim <jacobkim0707@gmail.com> (set globally on Windows).
-- `gh` CLI at `C:\Program Files\GitHub CLI\gh.exe`, signed in as `scerial`.
+- Commit identity is set globally on Windows.
+- `gh` CLI installed and signed in.
 - Still open: is a physical Galaxy device available?
 
 ## Environment (checked 2026-10-22)
