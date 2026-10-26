@@ -1,10 +1,14 @@
 package com.menuupdater.weeklymenu.data
 
+import android.util.Log
+import com.menuupdater.weeklymenu.domain.DishCorrector
 import com.menuupdater.weeklymenu.domain.MenuSource
 import com.menuupdater.weeklymenu.domain.MenuTable
 import com.menuupdater.weeklymenu.domain.MenuTableParser
+import com.menuupdater.weeklymenu.domain.TableVoter
 import com.menuupdater.weeklymenu.domain.RecognizedLine
 import com.menuupdater.weeklymenu.domain.WeeklyMenu
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -22,8 +26,15 @@ typealias Recognizer = suspend (ByteArray) -> List<RecognizedLine>
  */
 class MenuRepository(
     private val recognizer: Recognizer,
+    /**
+     * Further readings of the same image (other preprocessing). Their tables vote with the main
+     * reading, so a letter misread in one variant is outvoted by the others. Optional.
+     */
+    private val variantRecognizers: List<Recognizer> = emptyList(),
     private val client: OkHttpClient = defaultClient(),
     private val boardUrl: String = "https://www.agoodplacefnb.com/today",
+    /** Fixes OCR misreads in dish names using past menus; null leaves the OCR text as read. */
+    private val corrector: DishCorrector? = null,
 ) {
     suspend fun fetchLatestMenu(): WeeklyMenu {
         val (university, medical) = findLatestPosts()
@@ -62,9 +73,27 @@ class MenuRepository(
         var firstError: Throwable? = null
         for (imageUrl in imageUrls) {
             try {
-                val lines = recognizer(fetchBytes(imageUrl))
-                MenuTableParser.parse(lines)?.let { tables.add(it) }
+                val bytes = fetchBytes(imageUrl)
+                val mainLines = recognizer(bytes)
+                val readings = listOfNotNull(MenuTableParser.parse(mainLines)) +
+                    variantRecognizers.mapNotNull { variant ->
+                        // A failing extra reading only loses its vote.
+                        try {
+                            MenuTableParser.parse(variant(bytes))
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (e: Exception) {
+                            Log.w(TAG, "extra reading failed", e)
+                            null
+                        }
+                    }
+                Log.i(TAG, "image $imageUrl: ${bytes.size} bytes, ${mainLines.size} lines, ${readings.size} readings")
+                if (readings.isNotEmpty()) {
+                    val voted = TableVoter.vote(readings, isKnown = { corrector?.knows(it) ?: false })
+                    tables.add(corrector?.correct(voted) ?: voted)
+                }
             } catch (e: Throwable) {
+                Log.w(TAG, "image failed: $imageUrl", e)
                 if (firstError == null) firstError = e
             }
         }
@@ -108,7 +137,7 @@ class MenuRepository(
     private suspend fun fetchBytes(url: String): ByteArray = withContext(Dispatchers.IO) {
         val request = Request.Builder()
             .url(url)
-            .header("User-Agent", "Mozilla/5.0 WeeklyMenuApp")
+            .header("User-Agent", "Mozilla/5.0 (compatible; SCHMenu; +https://scerial.github.io/menu-updater/privacy/)")
             .build()
         client.newCall(request).execute().use { response ->
             if (!response.isSuccessful) throw IOException("HTTP ${response.code} for $url")
@@ -117,8 +146,10 @@ class MenuRepository(
     }
 
     companion object {
+        private const val TAG = "MenuRepository"
         // The board's "all keywords" search token; pages past the first carry it plus &page=N.
-        private const val PAGE_QUERY = "YToxOntzOjEyOiJrZXl3b3JkX3R5cGUiO3M6MzoiYWxsIjt9"
+        // Internal so the instrumented corpus dump (DishCorpusDump) can walk the same pages.
+        internal const val PAGE_QUERY = "YToxOntzOjEyOiJrZXl3b3JkX3R5cGUiO3M6MzoiYWxsIjt9"
 
         fun defaultClient(): OkHttpClient = OkHttpClient.Builder()
             .connectTimeout(20, TimeUnit.SECONDS)

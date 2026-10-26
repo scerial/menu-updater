@@ -53,6 +53,21 @@ final class MenuParsingTests: XCTestCase {
         XCTAssertEqual(posts.map(\.title), ["26년 10월 4주차 순천향대학교 의과대학 식단"])
     }
 
+    func testRecentPostWithRelativeTimeUsesDateFromTitleAttribute() throws {
+        let html = """
+        <ul class="li_body"><li class="tit"><a class="list_text_title" href="/today/?bmode=view&amp;idx=2"><span>26년 10월 5주차 순천향대학교 식단</span></a></li><li class="time" title="2026-10-26 09:46">3시간전</li></ul>
+        <ul class="li_body"><li class="tit"><a class="list_text_title" href="/today/?bmode=view&amp;idx=1"><span>26년 10월 4주차 순천향대학교 식단</span></a></li><li class="time" title="2026-10-16 09:45">2026-10-16</li></ul>
+        """
+
+        let posts = try MenuRepository.eligiblePosts(
+            in: html,
+            baseURL: URL(string: "https://www.agoodplacefnb.com/today")!
+        )
+
+        XCTAssertEqual(posts.map(\.date), ["2026-10-26", "2026-10-16"])
+        XCTAssertEqual(posts.max { $0.date < $1.date }?.title, "26년 10월 5주차 순천향대학교 식단")
+    }
+
     func testExtractsAllUploadedMenuImages() throws {
         let html = """
         <img src="https://cdn.imweb.me/upload/menu-a.png">

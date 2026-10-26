@@ -24,11 +24,36 @@ Lives next to `OcrService.kt`. The overall Android status is in `android/PLAN.md
 - **Still wrong:** misreads vary from cell to cell, so a dish can read correctly in one place and wrong in another (공나물국 vs 콩나물국). 숭늉 is read as 숭능.
 - **Not measured:** the unbundled "downloadable" model (`play-services-mlkit-text-recognition-korean`). It defines the same `KoreanTextRecognizerOptions` class as the bundled model, so both can't be in one APK. Comparing them needs a separate build flavor. This is deferred.
 - **Run:**
-  - Status: run but not committed. The `OcrQualityTest` file, the junk filter and the preprocessing exist only in the working tree of the PC with the Note 20 until they're committed.
+  - Status: committed in `d4a1767`.
   - To rerun the measurement: `.\gradlew.bat :app:connectedDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=com.menuupdater.weeklymenu.OcrQualityTest"`.
   - The report is in logcat under the `OcrQuality` tag. `connectedAndroidTest` uninstalls the app after the run, so the report file it writes is deleted with it.
 
-## Next: dish lexicon from past menus (planned, not implemented)
+## Dish lexicon from past menus (implemented 2026-10-25, not committed)
+
+### What was built, and where it differs from the plan below
+- `domain/DishCorrector.kt` (+ `DishSegments`, `DishLexicon`), `ocr/OcrService.Preprocess`, `androidTest/.../DishCorpusDump.kt`, `test/.../BuildDishLexicon.kt`, `assets/dish-lexicon.json`. Wired into `MenuRepository` (new parses) and `MenuViewModel` (cached menu too).
+- **`RATIO` is 2, not 5.** At 5 the known misreads stayed (공나물불고기 5 vs 콩나물불고기 10; the fixture test failed). At 2 the hold-out on the newest week made 8 changes, all right.
+- **Two reviewed lists in the JSON:** `keep` (real dishes never rewritten: 부추겉절이, 곤약메추리알장조림) and `fixes` (장각삼계팅 → 장각삼계탕, too close to call by count, 4 vs 5). They live as constants `KEEP` and `FIXES` in `BuildDishLexicon` and are written into the JSON on every rebuild.
+- Corpus: 90 unique images, 270 readings (the dump also re-read about 40 images because the board lists some posts under two URLs; the files overwrite each other). 896 dishes, 205 rewrites to review in `build/lexicon-report.txt`.
+- Not fixed: 숭늉 (never read right), a dropped syllable (간장돈육고기 for …불고기), a dropped `*` separator (감자튀김케찹).
+
+### Rebuild each semester (with `schedule.json`)
+```
+gradlew :app:installDebug :app:installDebugAndroidTest
+adb shell am instrument -w -e class com.menuupdater.weeklymenu.DishCorpusDump io.github.scerial.soonmenu.test/androidx.test.runner.AndroidJUnitRunner
+adb pull /sdcard/Android/data/io.github.scerial.soonmenu/files/corpus android/ocr-corpus
+$env:BUILD_LEXICON="1"; gradlew :app:testDebugUnitTest --tests "*BuildDishLexicon*"
+```
+Then read `android/build/lexicon-report.txt`, update `KEEP`/`FIXES` if a real dish was rewritten, and rebuild. If the phone has this app signed by another PC's debug key, `adb uninstall io.github.scerial.soonmenu` first.
+
+### Runtime voting (2026-10-25, not committed)
+- Each image is now read three ways (`CONTRAST_UPSCALE` as the reference, plus `CONTRAST` and `NONE`); `domain/TableVoter` keeps the spelling most readings agree on, per dish, with the reference deciding the layout. `MenuRepository(variantRecognizers = …)`, `OcrService.variantRecognizers`. The lexicon corrector runs after the vote.
+- **Measured** (`EvaluateVoting`, `EVAL_VOTING=1`, leave-one-week-out on the corpus, share of dish names the other weeks never produced): single 11.2%, lexicon only 9.4%, voting only 9.5%, voting + lexicon 8.9%. Most of the rest are genuinely new dishes.
+- **On the Note 20:** first live load 7 s end to end (board, images, 9 OCR passes). The saved menu had 214 dishes and only a new dish (상추야채겉절이) outside the lexicon.
+- Added `fixes` for 숭능/중늉 → 숭늉 and 간장돈육고기 → 간장돈육불고기 (the reader never gets 숭늉 right; a dropped syllable is out of the fixer's range).
+- Ceiling: when all three readings make the same mistake (교자민두, 사송이버섯, 부추나울) neither voting nor the lexicon can fix it. Options left are manual `fixes` or a weekly shared file produced off-device.
+
+### Original plan (kept for reference)
 
 ### Goal
 The board keeps about 30 weeks of history: 2026-03-12 to 2026-10-16, about 60 posts and about 90 images. Pages past ~10 return the last page. Dishes recur and usually read correctly, so a frequency count of past dish names can replace an occasional misread with the most common spelling.
@@ -59,8 +84,8 @@ The slow device-only work (downloading and running OCR) happens **once**. Everyt
 - Commands, from `android/`, with `JAVA_HOME` and `ANDROID_HOME` set:
   ```
   .\gradlew.bat :app:installDebug :app:installDebugAndroidTest
-  adb shell am instrument -w -e class com.menuupdater.weeklymenu.DishCorpusDump com.menuupdater.weeklymenu.test/androidx.test.runner.AndroidJUnitRunner
-  adb pull /sdcard/Android/data/com.menuupdater.weeklymenu/files/corpus ocr-corpus
+  adb shell am instrument -w -e class com.menuupdater.weeklymenu.DishCorpusDump io.github.scerial.soonmenu.test/androidx.test.runner.AndroidJUnitRunner
+  adb pull /sdcard/Android/data/io.github.scerial.soonmenu/files/corpus ocr-corpus
   ```
 - Put the output in `android/ocr-corpus/` and add that folder to `.gitignore`. It is about 2–3 MB, kept locally only, and rerun only to refresh the lexicon.
 
@@ -124,3 +149,6 @@ This order needs only two device sessions.
 - The hold-out section of `lexicon-report.txt` shows mostly correct fixes and no wrong ones. Spot-check the mappings list.
 - On the device, 공나물, 걸절이 and 삼계팅 are corrected in all three cafeterias, with nothing new looking wrong compared with earlier screenshots.
 - Report the totals (images and dishes), how long the corpus dump took, what still misreads (likely 숭늉), and anything that was only build-checked. Don't commit until asked.
+
+## Tried and ruled out: on-device Gemini Nano (2026-10-25)
+ML Kit GenAI Prompt API (`genai-prompt:1.0.0-beta4`, image input) on a Galaxy S25 Ultra (SM-S938N, Android 16, AICore installed): `checkStatus()` returned 0 (unavailable) and every request failed with `AiCore ... 601-BINDING_FAILURE: SecurityException`. Google's device list names Pixel 9/10 and Galaxy Z Fold7, not the S25 line. Not usable as a foundation. The probe test and dependency were removed.

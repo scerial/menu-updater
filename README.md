@@ -1,12 +1,13 @@
 # Menu Updater
 
-Shows today's and this week's 순천향대학교 cafeteria menus from https://www.agoodplacefnb.com/today. Menu images are downloaded and read with on-device Korean OCR; there is no backend.
+Shows today's and this week's 순천향대학교 cafeteria menus from https://www.agoodplacefnb.com/today (app name 순대 학식 / SCH Menu). The UI is Korean, and English when the phone is set to English. Menu images are downloaded and read with on-device Korean OCR; there is no backend.
 
 | Folder | What | Built on |
 |---|---|---|
 | `ios/` | SwiftUI iPhone/iPad app (Apple Vision OCR). See `ios/README.md` and `ios/HANDOFF.md`. | Mac (Xcode + XcodeGen) |
 | `android/` | Kotlin + Jetpack Compose port (ML Kit OCR). See `android/port_plan.md` (requirements) and `android/PLAN.md` (working plan and status). | Windows (Android Studio) |
-| `design/IconComposer/` | App icon source layers. | — |
+| `shared/translations/` | `en.json`: the English for dishes, cafeterias, venues and meals, used by both apps. See its README. | — |
+| `design/IconComposer/` | App icon source layers (the icon in use). `design/IconB/` is an unused alternative. | — |
 
 ## Working across Mac and Windows
 

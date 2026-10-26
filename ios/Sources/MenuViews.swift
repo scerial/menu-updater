@@ -9,10 +9,10 @@ enum AppTab: CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .today: "오늘"
-        case .week: "이번 주"
-        case .hours: "운영 시간"
-        case .settings: "설정"
+        case .today: String(localized: "오늘")
+        case .week: String(localized: "이번 주")
+        case .hours: String(localized: "운영 시간")
+        case .settings: String(localized: "설정")
         }
     }
 
@@ -103,6 +103,7 @@ struct MenuRootView: View {
         .tint(Theme.accent)
         .environment(\.menuTextScale, textSize.scale)
         .environment(\.uiScale, Theme.uiScale)
+        .environment(\.tr, Tr.current)
         .environment(viewModel)
     }
 
@@ -111,13 +112,14 @@ struct MenuRootView: View {
         switch tab {
         case .today:
             MenuScreen(viewModel: viewModel, layout: layout, cafeteria: cafeteriaBinding,
-                       subtitle: { _ in KoreanDate.full(viewModel.today) }, title: "오늘의 메뉴") { menu, cafeteria in
+                       subtitle: { _ in AppDate.full(viewModel.today, english: Tr.current.isEnglish) },
+                       title: String(localized: "오늘의 메뉴")) { menu, cafeteria in
                 TodayPage(menu: menu, today: viewModel.today, cafeteria: cafeteria, layout: layout)
             }
         case .week:
             MenuScreen(viewModel: viewModel, layout: layout, cafeteria: cafeteriaBinding,
-                       subtitle: { menu in menu.flatMap { KoreanDate.range(of: $0.tables.flatMap(\.days)) } ?? "" },
-                       title: "이번 주 메뉴") { menu, cafeteria in
+                       subtitle: { menu in menu.flatMap { AppDate.range(of: $0.tables.flatMap(\.days), english: Tr.current.isEnglish) } ?? "" },
+                       title: String(localized: "이번 주 메뉴")) { menu, cafeteria in
                 WeekPage(menu: menu, today: viewModel.today, cafeteria: cafeteria, layout: layout)
             }
         case .hours:
@@ -183,7 +185,7 @@ struct Sidebar: View {
                     .frame(width: 40, height: 40)
                     .background(Theme.accent, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                     .accessibilityHidden(true)
-                Text("학식 메뉴")
+                Text("순대 학식")
                     .appFont(22, .bold)
             }
             .padding(.horizontal, 12)
@@ -329,6 +331,7 @@ struct CafeteriaPicker: View {
     let names: [String]
     @Binding var selection: String
     @Namespace private var thumb
+    @Environment(\.tr) private var tr
 
     var body: some View {
         HStack(spacing: 0) {
@@ -337,9 +340,11 @@ struct CafeteriaPicker: View {
                 Button {
                     withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { selection = name }
                 } label: {
-                    Text(name)
-                        .appFont(17, .bold)
-                        .lineLimit(1)
+                    let label = tr.place(name)
+                    Text(label)
+                        .appFont(label.count > 12 ? 14 : 17, .bold)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
                         .minimumScaleFactor(0.7)
                         .foregroundStyle(isSelected ? .white : Theme.tertiaryText)
                         .padding(.horizontal, 4)
@@ -486,7 +491,8 @@ struct TodayColumn: View {
                         .id(meal.name)
                 }
             } else {
-                EmptyMealCard(title: "오늘 메뉴가 없어요", detail: "\(table.cafeteria) 메뉴에 오늘 날짜가 없어요.")
+                EmptyMealCard(title: String(localized: "오늘 메뉴가 없어요"),
+                              detail: String(localized: "\(Tr.current.place(table.cafeteria)) 메뉴에 오늘 날짜가 없어요."))
             }
         }
     }
@@ -495,16 +501,17 @@ struct TodayColumn: View {
 struct CafeteriaHeading: View {
     let table: MenuTable
     let isWide: Bool
+    @Environment(\.tr) private var tr
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             if !table.cafeteria.isEmpty {
-                Text(table.cafeteria)
+                Text(tr.place(table.cafeteria))
                     .appFont(isWide ? 26 : 24, .bold)
                     .accessibilityAddTraits(.isHeader)
             }
             if !table.mealNames.isEmpty {
-                Text(table.mealNames.joined(separator: " · "))
+                Text(table.mealNames.map(tr.meal).joined(separator: " · "))
                     .appFont(isWide ? 16 : 15)
                     .foregroundStyle(Theme.secondaryText)
             }
@@ -519,11 +526,16 @@ struct MealCard: View {
     let status: MealSchedule.Status?
     let isFocused: Bool
     let isWide: Bool
+    @Environment(\.tr) private var screenTr
+    @State private var showKorean = false
+
+    /// This card's language: the screen's, or Korean after a tap.
+    private var tr: Tr { showKorean ? .korean : screenTr }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 8) {
-                Text(meal.timeLabel)
+                Text(meal.timeLabel(tr))
                     .appFont(16, .bold)
                     .foregroundStyle(isFocused ? Theme.accent : Theme.secondaryText)
                 Spacer(minLength: 0)
@@ -533,7 +545,7 @@ struct MealCard: View {
             }
 
             if let main = meal.items.first {
-                Text(main)
+                Text(tr.dish(main))
                     .appFont(24, .bold, menu: true)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -541,7 +553,7 @@ struct MealCard: View {
             if meal.items.count > 1 {
                 FlowLayout(spacing: 8) {
                     ForEach(Array(meal.items.dropFirst().enumerated()), id: \.offset) { _, item in
-                        Text(item)
+                        Text(tr.dish(item))
                             .appFont(17, menu: true)
                             .padding(.horizontal, 10)
                             .padding(.vertical, 6)
@@ -554,6 +566,8 @@ struct MealCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .card(highlighted: isFocused, radius: isWide ? 18 : 16)
         .accessibilityElement(children: .combine)
+        .languageFlip($showKorean, isEnabled: screenTr.isEnglish, radius: isWide ? 18 : 16)
+        .onChange(of: meal.items) { showKorean = false }
     }
 }
 
@@ -561,7 +575,7 @@ struct StatusPill: View {
     let status: MealSchedule.Status
 
     var body: some View {
-        Text(status.label)
+        Text(status.displayLabel)
             .appFont(14, .bold)
             .foregroundStyle(status == .open ? .white : (status == .closed ? Theme.secondaryText : Theme.text))
             .padding(.horizontal, 10)
@@ -664,7 +678,7 @@ struct PeriodBar: View {
                 let isSelected = name == selection
                 Button { selection = name } label: {
                     VStack(spacing: 0) {
-                        Text(name)
+                        Text(Tr.current.meal(name))
                             .appFont(17, .bold)
                         if let hours = MealSchedule.hoursLabel(for: name) {
                             Text(hours)
@@ -703,10 +717,7 @@ struct WeekRows: View {
         }
 
         if rows.isEmpty {
-            EmptyMealCard(
-                title: "이 시간에는 운영하지 않아요",
-                detail: "\(table.cafeteria)은 \(table.mealNames.joined(separator: " · "))만 운영해요"
-            )
+            EmptyMealCard.notServing(table)
         } else {
             EqualHeightGrid(columns: 1) {
                 ForEach(rows, id: \.day.id) { row in
@@ -742,10 +753,7 @@ struct WeekGrid: View {
                 case let .row(day, meal, isToday):
                     WeekRow(day: day, meal: meal, isToday: isToday, isWide: true)
                 case let .closed(table):
-                    EmptyMealCard(
-                        title: "이 시간에는 운영하지 않아요",
-                        detail: "\(table.cafeteria)은 \(table.mealNames.joined(separator: " · "))만 운영해요"
-                    )
+                    EmptyMealCard.notServing(table)
                 case .blank:
                     Color.clear
                 }
@@ -777,11 +785,16 @@ struct WeekRow: View {
     let meal: MealSection
     let isToday: Bool
     let isWide: Bool
+    @Environment(\.tr) private var screenTr
+    @State private var showKorean = false
+
+    /// This card's language: the screen's, or Korean after a tap.
+    private var tr: Tr { showKorean ? .korean : screenTr }
 
     var body: some View {
         HStack(spacing: isWide ? 16 : 14) {
             VStack(spacing: 0) {
-                Text(day.weekday)
+                Text(tr.weekday(day.weekday))
                     .appFont(isWide ? 16 : 15, .bold)
                 Text("\(day.day)")
                     .appFont(isWide ? 24 : 22, .bold)
@@ -791,7 +804,7 @@ struct WeekRow: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 8) {
-                    Text(meal.items.first ?? "")
+                    Text(tr.dish(meal.items.first ?? ""))
                         .appFont(isWide ? 21 : 19, .bold, menu: true)
                         .fixedSize(horizontal: false, vertical: true)
                     if isToday {
@@ -804,7 +817,7 @@ struct WeekRow: View {
                     }
                 }
                 if meal.items.count > 1 {
-                    Text(meal.items.dropFirst().joined(separator: " · "))
+                    Text(meal.items.dropFirst().map(tr.dish).joined(separator: " · "))
                         .appFont(15, menu: true)
                         .foregroundStyle(Theme.secondaryText)
                         .lineSpacing(3)
@@ -818,7 +831,26 @@ struct WeekRow: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .card(highlighted: isToday)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(day.heading)\(isToday ? ", 오늘" : ""), \(meal.items.joined(separator: ", "))")
+        .accessibilityLabel(Text(verbatim: accessibilityText))
+        .languageFlip($showKorean, isEnabled: screenTr.isEnglish)
+        .onChange(of: meal.items) { showKorean = false }
+    }
+
+    private var accessibilityText: String {
+        let date = tr.isEnglish ? "\(tr.weekday(day.weekday)) \(day.month)/\(day.day)" : day.heading
+        let today = isToday ? [String(localized: "오늘")] : []
+        return ([date] + today + [meal.items.map(tr.dish).joined(separator: ", ")]).joined(separator: ", ")
+    }
+}
+
+extension EmptyMealCard {
+    /// "향설1관은 중식만 운영해요" for a cafeteria that doesn't serve the chosen meal.
+    static func notServing(_ table: MenuTable) -> EmptyMealCard {
+        let tr = Tr.current
+        return EmptyMealCard(
+            title: String(localized: "이 시간에는 운영하지 않아요"),
+            detail: String(localized: "\(tr.place(table.cafeteria))은 \(table.mealNames.map(tr.meal).joined(separator: " · "))만 운영해요")
+        )
     }
 }
 
@@ -833,8 +865,8 @@ extension MenuTable {
 }
 
 extension MealSection {
-    /// "중식 · 11:30–13:30", or just the meal name when its hours aren't known.
-    var timeLabel: String {
-        MealSchedule.hoursLabel(for: name).map { "\(name) · \($0)" } ?? name
+    /// "중식 · 11:00–14:00" ("Lunch · 11:00–14:00"), or just the meal name when its hours aren't known.
+    func timeLabel(_ tr: Tr) -> String {
+        MealSchedule.hoursLabel(for: name).map { "\(tr.meal(name)) · \($0)" } ?? tr.meal(name)
     }
 }

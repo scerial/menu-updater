@@ -8,6 +8,11 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.menuupdater.weeklymenu.data.MenuCache
 import com.menuupdater.weeklymenu.data.MenuRepository
+import com.menuupdater.weeklymenu.data.MenuError
+import com.menuupdater.weeklymenu.data.MenuException
+import com.menuupdater.weeklymenu.domain.DishCorrector
+import com.menuupdater.weeklymenu.domain.Translator
+import com.menuupdater.weeklymenu.domain.MenuMerge
 import com.menuupdater.weeklymenu.domain.RefreshPolicy
 import com.menuupdater.weeklymenu.domain.Schedule
 import com.menuupdater.weeklymenu.domain.TextSize
@@ -29,7 +34,23 @@ import java.time.ZoneId
 class MenuViewModel(app: Application) : AndroidViewModel(app) {
     private val cache = MenuCache(app)
     private val preferences = MenuPreferences(app)
-    private val repository = MenuRepository(recognizer = OcrService().recognizer)
+
+    // A missing or unreadable lexicon just means no correction; the app works without it.
+    private val corrector: DishCorrector? = runCatching {
+        DishCorrector.fromJson(app.assets.open("dish-lexicon.json").bufferedReader().use { it.readText() })
+    }.getOrNull()
+
+    private val ocr = OcrService()
+    private val repository = MenuRepository(
+        recognizer = ocr.recognizer,
+        variantRecognizers = ocr.variantRecognizers,
+        corrector = corrector,
+    )
+
+    /** English for dishes and places (shared/translations/en.json); used only when the app is in English. */
+    val translator: Translator? = runCatching {
+        Translator.fromJson(app.assets.open("en.json").bufferedReader().use { it.readText() })
+    }.getOrNull()
 
     val schedule: Schedule =
         Schedule.fromJson(app.assets.open("schedule.json").bufferedReader().use { it.readText() })
@@ -38,7 +59,8 @@ class MenuViewModel(app: Application) : AndroidViewModel(app) {
         private set
     var isLoading by mutableStateOf(false)
         private set
-    var errorMessage by mutableStateOf<String?>(null)
+    /** Why the last load failed, or null. The screens word it in the current language. */
+    var error by mutableStateOf<MenuError?>(null)
         private set
 
     /** The instant the views treat as "now"; refreshed when the app comes to the foreground. */
@@ -53,7 +75,8 @@ class MenuViewModel(app: Application) : AndroidViewModel(app) {
 
     init {
         cache.load()?.let {
-            menu = it.menu
+            // Correct the cached menu too, so existing installs get the fixes before the next refresh.
+            menu = corrector?.correct(it.menu) ?: it.menu
             lastFetchedEpochMs = it.fetchedAtEpochMs
         }
         refresh()
@@ -69,16 +92,20 @@ class MenuViewModel(app: Application) : AndroidViewModel(app) {
         if (isLoading) return
         viewModelScope.launch {
             isLoading = true
-            errorMessage = null
+            error = null
             try {
-                val result = repository.fetchLatestMenu()
-                menu = result
+                val fresh = repository.fetchLatestMenu()
+                // A partial refresh (one image failed) must not replace a complete menu.
+                val result = MenuMerge.preferFuller(menu, fresh)
                 now = LocalDateTime.now()
-                val fetchedAt = System.currentTimeMillis()
-                lastFetchedEpochMs = fetchedAt
-                cache.save(result, fetchedAt)
+                if (result === fresh) {
+                    menu = result
+                    val fetchedAt = System.currentTimeMillis()
+                    lastFetchedEpochMs = fetchedAt
+                    cache.save(result, fetchedAt)
+                }
             } catch (e: Throwable) {
-                errorMessage = e.message ?: "메뉴를 불러오지 못했어요."
+                error = (e as? MenuException)?.error ?: MenuError.LOAD_FAILED
             } finally {
                 isLoading = false
             }

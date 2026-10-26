@@ -7,8 +7,20 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.math.min
 
-data class VenueStatus(val level: Level, val label: String, val hours: String?) {
+/**
+ * A venue's live status. [label] is the Korean text; screens build their own wording from [kind]
+ * (with [opensAt] or [minutesLeft]) so the status can be shown in English too.
+ */
+data class VenueStatus(
+    val level: Level,
+    val label: String,
+    val hours: String?,
+    val kind: Kind,
+    val opensAt: String? = null,
+    val minutesLeft: Int? = null,
+) {
     enum class Level { OPEN, CLOSING_SOON, CLOSED }
+    enum class Kind { NOT_OPERATING, DAY_OFF, OPENS_AT, ENDED, CLOSING_SOON, OPEN }
 }
 
 /**
@@ -41,24 +53,30 @@ data class Venue(
     }
 
     fun status(at: LocalDateTime): VenueStatus {
-        if (!isOperating) return VenueStatus(VenueStatus.Level.CLOSED, "미운영", null)
+        if (!isOperating) return VenueStatus(VenueStatus.Level.CLOSED, "미운영", null, VenueStatus.Kind.NOT_OPERATING)
         val range = hours(at.dayOfWeek)
-            ?: return VenueStatus(VenueStatus.Level.CLOSED, "오늘 휴무", null)
+            ?: return VenueStatus(VenueStatus.Level.CLOSED, "오늘 휴무", null, VenueStatus.Kind.DAY_OFF)
         val minute = at.hour * 60 + at.minute
         val hoursText = "${clock(range.start)}–${clock(range.end)}"
         val end = min(range.end, serviceEnd ?: range.end)
 
         if (minute < range.start) {
-            return VenueStatus(VenueStatus.Level.CLOSED, "${clock(range.start)} 오픈", hoursText)
+            return VenueStatus(
+                VenueStatus.Level.CLOSED, "${clock(range.start)} 오픈", hoursText,
+                VenueStatus.Kind.OPENS_AT, opensAt = clock(range.start),
+            )
         }
         if (minute >= end) {
-            return VenueStatus(VenueStatus.Level.CLOSED, "운영 종료", hoursText)
+            return VenueStatus(VenueStatus.Level.CLOSED, "운영 종료", hoursText, VenueStatus.Kind.ENDED)
         }
         val remaining = end - minute
         if (remaining <= CLOSING_SOON_MINUTES) {
-            return VenueStatus(VenueStatus.Level.CLOSING_SOON, "${remaining}분 후 마감", hoursText)
+            return VenueStatus(
+                VenueStatus.Level.CLOSING_SOON, "${remaining}분 후 마감", hoursText,
+                VenueStatus.Kind.CLOSING_SOON, minutesLeft = remaining,
+            )
         }
-        return VenueStatus(VenueStatus.Level.OPEN, "운영 중", hoursText)
+        return VenueStatus(VenueStatus.Level.OPEN, "운영 중", hoursText, VenueStatus.Kind.OPEN)
     }
 
     private fun List<Int>.span() = Span(this[0], this[1])
@@ -79,15 +97,18 @@ data class VenueGroup(val building: String, val venues: List<Venue>)
 @Serializable
 data class Schedule(
     val semesterLabel: String,
+    /** English versions of [semesterLabel] and [footer]; null falls back to the Korean. */
+    val semesterLabelEn: String? = null,
     /** First and last day the notice covers, as ISO dates. */
     val validFrom: String,
     val validUntil: String,
     /** Footer shown under the hours list. */
     val footer: String,
+    val footerEn: String? = null,
     val groups: List<VenueGroup>,
 ) {
-    private val from: LocalDate get() = LocalDate.parse(validFrom)
-    private val until: LocalDate get() = LocalDate.parse(validUntil)
+    val from: LocalDate get() = LocalDate.parse(validFrom)
+    val until: LocalDate get() = LocalDate.parse(validUntil)
 
     fun isWithinNotice(date: LocalDate): Boolean = !date.isBefore(from) && !date.isAfter(until)
 

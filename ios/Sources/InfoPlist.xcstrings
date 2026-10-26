@@ -1,0 +1,24 @@
+{
+  "sourceLanguage": "ko",
+  "strings": {
+    "CFBundleDisplayName": {
+      "comment": "Home screen name",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "new",
+            "value": "순대 학식"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SCH Menu"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

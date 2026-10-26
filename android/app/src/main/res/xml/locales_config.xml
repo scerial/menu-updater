@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Lets Android's per-app language setting (Settings → Apps → 순대 학식 → Language) offer these. -->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="ko" />
+    <locale android:name="en" />
+</locale-config>

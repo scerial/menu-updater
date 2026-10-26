@@ -10,7 +10,7 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.menuupdater.weeklymenu"
+        applicationId = "io.github.scerial.soonmenu"
         minSdk = 33
         targetSdk = 36
         versionCode = 1
@@ -18,8 +18,23 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // Upload key lives outside the repo; its path and password come from ~/.gradle/gradle.properties.
+    // Without them the release build is simply left unsigned.
+    signingConfigs {
+        val storePath = providers.gradleProperty("SOONMENU_UPLOAD_STORE_FILE").orNull
+        if (storePath != null) {
+            create("upload") {
+                storeFile = file(storePath)
+                storePassword = providers.gradleProperty("SOONMENU_UPLOAD_PASSWORD").get()
+                keyAlias = "upload"
+                keyPassword = providers.gradleProperty("SOONMENU_UPLOAD_PASSWORD").get()
+            }
+        }
+    }
+
     buildTypes {
         release {
+            signingConfigs.findByName("upload")?.let { signingConfig = it }
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -32,11 +47,21 @@ android {
         compose = true
     }
 
+    // Lets JVM unit tests run code that logs (android.util.Log returns defaults instead of throwing).
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
+
     // The domain layer reads assets/schedule.json at runtime; JVM unit tests read the same
     // file from the classpath, so it stays the single source of truth for semester hours.
+    // shared/translations (en.json) is shared with iOS, so both apps read the one file.
     sourceSets {
+        getByName("main") {
+            assets.directories.add("../../shared/translations")
+        }
         getByName("test") {
             resources.directories.add("src/main/assets")
+            resources.directories.add("../../shared/translations")
         }
     }
 }

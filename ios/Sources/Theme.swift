@@ -178,24 +178,7 @@ enum MealSchedule {
     }
 }
 
-// MARK: - Dates
-
-enum KoreanDate {
-    private static let locale = Locale(identifier: "ko_KR")
-
-    /// "10월 21일 수요일"
-    static func full(_ date: Date) -> String {
-        date.formatted(.dateTime.month(.wide).day().weekday(.wide).locale(locale))
-    }
-
-    /// "10월 19일 – 10월 23일" for the days a post covers.
-    static func range(of days: [MenuDay]) -> String? {
-        let sorted = days.sorted { $0.id < $1.id }
-        guard let first = sorted.first, let last = sorted.last else { return nil }
-        let start = "\(first.month)월 \(first.day)일"
-        return first.id == last.id ? start : "\(start) – \(last.month)월 \(last.day)일"
-    }
-}
+// Dates: see `AppDate` in Translator.swift (Korean or English).
 
 // MARK: - Layout helpers
 

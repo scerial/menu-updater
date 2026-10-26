@@ -26,7 +26,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.menuupdater.weeklymenu.R
 import com.menuupdater.weeklymenu.domain.MealSchedule
 import com.menuupdater.weeklymenu.domain.MealSection
 import com.menuupdater.weeklymenu.domain.MenuDay
@@ -51,7 +53,7 @@ private fun MenuScroll(
             .padding(top = 20.dp, bottom = 28.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        viewModel.errorMessage?.let { StaleMenuBanner(it) }
+        viewModel.error?.let { StaleMenuBanner(menuErrorText(it)) }
         content()
         SourceFooter(menu.sources, Modifier.padding(top = 12.dp))
     }
@@ -66,7 +68,7 @@ fun TodayPage(viewModel: MenuViewModel, menu: WeeklyMenu, cafeteria: String, lay
 
     MenuScroll(viewModel, menu, layout) {
         if (entries.isEmpty()) {
-            EmptyMealCard("오늘 메뉴가 없어요", "이 게시물에는 오늘 날짜가 없어요. 이번 주 탭을 확인해 주세요.")
+            EmptyMealCard(stringResource(R.string.empty_today_title), stringResource(R.string.empty_today_detail))
         } else if (layout.showsColumns) {
             Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
                 for (table in menu.tables) {
@@ -93,13 +95,17 @@ private fun TodayColumn(table: MenuTable, day: MenuDay?, now: LocalDateTime, isW
             for (meal in day.meals) {
                 MealCard(
                     meal = meal,
+                    flipKey = "today/${table.cafeteria}/${day.month}-${day.day}/${meal.name}",
                     status = MealSchedule.status(meal.name, now, table.cafeteria),
                     isFocused = meal.name == focus,
                     isWide = isWide,
                 )
             }
         } else {
-            EmptyMealCard("오늘 메뉴가 없어요", "${table.cafeteria} 메뉴에 오늘 날짜가 없어요.")
+            EmptyMealCard(
+                stringResource(R.string.empty_today_title),
+                stringResource(R.string.empty_today_cafeteria, LocalTr.current.place(table.cafeteria)),
+            )
         }
     }
 }
@@ -107,40 +113,44 @@ private fun TodayColumn(table: MenuTable, day: MenuDay?, now: LocalDateTime, isW
 @Composable
 private fun CafeteriaHeading(table: MenuTable, isWide: Boolean) {
     val colors = LocalMenuColors.current
+    val tr = LocalTr.current
     Column(
         Modifier.padding(horizontal = 4.dp).padding(bottom = 4.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         if (table.cafeteria.isNotEmpty()) {
-            AppText(table.cafeteria, if (isWide) 26 else 24, Bold)
+            AppText(tr.place(table.cafeteria), if (isWide) 26 else 24, Bold)
         }
         if (table.mealNames.isNotEmpty()) {
-            AppText(table.mealNames.joinToString(" · "), if (isWide) 16 else 15, color = colors.secondaryText)
+            AppText(table.mealNames.joinToString(" · ") { tr.meal(it) }, if (isWide) 16 else 15, color = colors.secondaryText)
         }
     }
 }
 
 @Composable
-private fun MealCard(meal: MealSection, status: MealSchedule.Status?, isFocused: Boolean, isWide: Boolean) {
+private fun MealCard(meal: MealSection, flipKey: String, status: MealSchedule.Status?, isFocused: Boolean, isWide: Boolean) {
     val colors = LocalMenuColors.current
+    val radius = if (isWide) 18.dp else 16.dp
+    val (tr, flip) = rememberCardLanguage(flipKey, radius)
     Column(
         Modifier
             .fillMaxWidth()
-            .card(highlighted = isFocused, radius = if (isWide) 18.dp else 16.dp)
+            .card(highlighted = isFocused, radius = radius)
+            .then(flip)
             .padding(if (isWide) 22.dp else 20.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             AppText(
-                meal.timeLabel, 16, Bold,
+                meal.timeLabel(tr), 16, Bold,
                 color = if (isFocused) colors.accent else colors.secondaryText,
                 modifier = Modifier.weight(1f),
             )
             status?.let { StatusPill(it) }
         }
-        meal.items.firstOrNull()?.let { AppText(it, 24, Bold, menu = true) }
+        meal.items.firstOrNull()?.let { AppText(tr.dish(it), 24, Bold, menu = true) }
         if (meal.items.size > 1) {
-            SideDishChips(meal.items.drop(1))
+            SideDishChips(meal.items.drop(1).map { tr.dish(it) })
         }
     }
 }
@@ -194,7 +204,7 @@ private fun PeriodBar(periods: List<String>, selection: String, onSelect: (Strin
                         Modifier.align(Alignment.Center),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        AppText(name, 17, Bold, color = if (selected) colors.text else colors.secondaryText)
+                        AppText(LocalTr.current.meal(name), 17, Bold, color = if (selected) colors.text else colors.secondaryText)
                         MealSchedule.hoursLabel(name)?.let {
                             AppText(it, 13, color = if (selected) colors.text else colors.secondaryText)
                         }
@@ -214,11 +224,11 @@ private fun PeriodBar(periods: List<String>, selection: String, onSelect: (Strin
 private fun WeekRows(table: MenuTable, period: String, now: LocalDateTime, isWide: Boolean) {
     val rows = table.days.mapNotNull { day -> day.meals.firstOrNull { it.name == period }?.let { day to it } }
     if (rows.isEmpty()) {
-        EmptyMealCard("이 시간에는 운영하지 않아요", "${table.cafeteria}은 ${table.mealNames.joinToString(" · ")}만 운영해요")
+        NotServingCard(table)
     } else {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             for ((day, meal) in rows) {
-                WeekRow(day, meal, isToday(day, now), isWide)
+                WeekRow(table.cafeteria, day, meal, isToday(day, now), isWide)
             }
         }
     }
@@ -245,9 +255,8 @@ private fun WeekGrid(tables: List<MenuTable>, period: String, now: LocalDateTime
                     Box(Modifier.weight(1f).fillMaxHeight()) {
                         val cell = perTable[col][id]
                         when {
-                            cell != null -> WeekRow(cell.first, cell.second, isToday(cell.first, now), isWide = true, Modifier.fillMaxHeight())
-                            !servesPeriod[col] && rowIndex == 0 ->
-                                EmptyMealCard("이 시간에는 운영하지 않아요", "${tables[col].cafeteria}은 ${tables[col].mealNames.joinToString(" · ")}만 운영해요")
+                            cell != null -> WeekRow(tables[col].cafeteria, cell.first, cell.second, isToday(cell.first, now), isWide = true, Modifier.fillMaxHeight())
+                            !servesPeriod[col] && rowIndex == 0 -> NotServingCard(tables[col])
                         }
                     }
                 }
@@ -257,12 +266,27 @@ private fun WeekGrid(tables: List<MenuTable>, period: String, now: LocalDateTime
 }
 
 @Composable
-private fun WeekRow(day: MenuDay, meal: MealSection, isToday: Boolean, isWide: Boolean, modifier: Modifier = Modifier) {
+private fun NotServingCard(table: MenuTable) {
+    val tr = LocalTr.current
+    EmptyMealCard(
+        stringResource(R.string.not_serving_title),
+        stringResource(
+            R.string.not_serving_detail,
+            tr.place(table.cafeteria),
+            table.mealNames.joinToString(" · ") { tr.meal(it) },
+        ),
+    )
+}
+
+@Composable
+private fun WeekRow(cafeteria: String, day: MenuDay, meal: MealSection, isToday: Boolean, isWide: Boolean, modifier: Modifier = Modifier) {
     val colors = LocalMenuColors.current
+    val (tr, flip) = rememberCardLanguage("week/$cafeteria/${day.month}-${day.day}/${meal.name}", 16.dp)
     Row(
         modifier
             .fillMaxWidth()
             .card(highlighted = isToday)
+            .then(flip)
             .padding(horizontal = if (isWide) 18.dp else 16.dp, vertical = 14.dp),
         horizontalArrangement = Arrangement.spacedBy(if (isWide) 16.dp else 14.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -272,15 +296,15 @@ private fun WeekRow(day: MenuDay, meal: MealSection, isToday: Boolean, isWide: B
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             val dayColor = if (isToday) colors.accent else colors.text
-            AppText(day.weekday, if (isWide) 16 else 15, Bold, color = dayColor)
+            AppText(tr.weekday(day.weekday), if (isWide) 16 else 15, Bold, color = dayColor)
             AppText("${day.day}", if (isWide) 24 else 22, Bold, color = dayColor)
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                AppText(meal.items.firstOrNull().orEmpty(), if (isWide) 21 else 19, Bold, menu = true, modifier = Modifier.weight(1f, fill = false))
+                AppText(tr.dish(meal.items.firstOrNull().orEmpty()), if (isWide) 21 else 19, Bold, menu = true, modifier = Modifier.weight(1f, fill = false))
                 if (isToday) {
                     AppText(
-                        "오늘", if (isWide) 14 else 13, Bold, color = Color.White,
+                        stringResource(R.string.badge_today), if (isWide) 14 else 13, Bold, color = Color.White,
                         modifier = Modifier
                             .background(colors.accent, RoundedCornerShape(50))
                             .padding(horizontal = if (isWide) 9.dp else 8.dp, vertical = 2.dp),
@@ -288,7 +312,7 @@ private fun WeekRow(day: MenuDay, meal: MealSection, isToday: Boolean, isWide: B
                 }
             }
             if (meal.items.size > 1) {
-                AppText(meal.items.drop(1).joinToString(" · "), 15, menu = true, color = colors.secondaryText)
+                AppText(meal.items.drop(1).joinToString(" · ") { tr.dish(it) }, 15, menu = true, color = colors.secondaryText)
             }
         }
     }

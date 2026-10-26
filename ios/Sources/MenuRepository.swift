@@ -46,9 +46,9 @@ enum MenuError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .noEligiblePost: return "순천향대학교 메뉴 게시물을 찾지 못했어요."
-        case .noMenuImages: return "게시물에 메뉴 이미지가 없어요."
-        case .noRecognizedText: return "메뉴 이미지에서 글자를 읽지 못했어요."
+        case .noEligiblePost: return String(localized: "순천향대학교 메뉴 게시물을 찾지 못했어요.")
+        case .noMenuImages: return String(localized: "게시물에 메뉴 이미지가 없어요.")
+        case .noRecognizedText: return String(localized: "메뉴 이미지에서 글자를 읽지 못했어요.")
         }
     }
 }
@@ -155,7 +155,7 @@ struct MenuRepository {
     private func fetchData(_ url: URL) async throws -> Data {
         var request = URLRequest(url: url)
         request.timeoutInterval = 20
-        request.setValue("Mozilla/5.0 WeeklyMenuApp", forHTTPHeaderField: "User-Agent")
+        request.setValue("Mozilla/5.0 (compatible; SCHMenu; +https://scerial.github.io/menu-updater/privacy/)", forHTTPHeaderField: "User-Agent")
         let (data, response) = try await session.data(for: request)
         guard let response = response as? HTTPURLResponse,
               (200..<300).contains(response.statusCode) else {
@@ -212,10 +212,14 @@ struct MenuRepository {
             let title = try link.text().trimmingCharacters(in: .whitespacesAndNewlines)
             guard isEligible(title) else { continue }
             guard let url = URL(string: try link.attr("href"), relativeTo: baseURL)?.absoluteURL else { continue }
-            let rowText = try link.parent()?.parent()?.text() ?? ""
+            let row = link.parent()?.parent()
+            // Recent posts show a relative time ("3시간전"); the full date is only in `li.time`'s title.
+            let timeTitle = try row?.select("li.time").first()?.attr("title") ?? ""
+            let rowText = try row?.text() ?? ""
             // Posts without a parseable date can't be ordered, so they are skipped.
-            guard let dateRange = rowText.range(of: #"\d{4}-\d{2}-\d{2}"#, options: .regularExpression) else { continue }
-            let date = String(rowText[dateRange])
+            guard let date = [timeTitle, rowText].lazy.compactMap({ text in
+                text.range(of: #"\d{4}-\d{2}-\d{2}"#, options: .regularExpression).map { String(text[$0]) }
+            }).first else { continue }
             posts.append(MenuPost(title: title, date: date, url: url))
         }
         return posts

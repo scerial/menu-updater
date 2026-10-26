@@ -30,6 +30,19 @@ class VenueStatusTest {
     }
 
     @Test
+    fun statusCarriesWhatTheEnglishLabelNeeds() {
+        val venue = venue("크앙분식")
+        val soon = venue.status(at(21, 19, 45))
+        assertEquals(VenueStatus.Kind.CLOSING_SOON, soon.kind)
+        assertEquals(15, soon.minutesLeft)
+        val before = venue.status(at(21, 8, 30))
+        assertEquals(VenueStatus.Kind.OPENS_AT, before.kind)
+        assertEquals("09:00", before.opensAt)
+        assertEquals(VenueStatus.Kind.DAY_OFF, venue.status(at(25, 12)).kind)
+        assertEquals(VenueStatus.Kind.NOT_OPERATING, venue("향설생활관3").status(at(21, 12)).kind)
+    }
+
+    @Test
     fun closingSoonStartsThirtyMinutesBeforeClose() {
         val venue = venue("크앙분식")
         assertEquals(VenueStatus.Level.OPEN, venue.status(at(21, 19, 29)).level)
