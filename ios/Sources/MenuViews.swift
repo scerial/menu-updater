@@ -340,9 +340,11 @@ struct CafeteriaPicker: View {
                 Button {
                     withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { selection = name }
                 } label: {
-                    Text(tr.place(name))
-                        .appFont(17, .bold)
-                        .lineLimit(1)
+                    let label = tr.place(name)
+                    Text(label)
+                        .appFont(label.count > 12 ? 14 : 17, .bold)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
                         .minimumScaleFactor(0.7)
                         .foregroundStyle(isSelected ? .white : Theme.tertiaryText)
                         .padding(.horizontal, 4)

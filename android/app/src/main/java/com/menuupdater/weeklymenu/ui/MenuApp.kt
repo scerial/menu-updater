@@ -29,6 +29,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.CompositionLocalProvider
@@ -305,10 +306,12 @@ fun CafeteriaPicker(names: List<String>, selection: String, onSelect: (String) -
                     .clickable { onSelect(name) },
                 contentAlignment = Alignment.Center,
             ) {
+                val label = LocalTr.current.place(name)
                 AppText(
-                    LocalTr.current.place(name), 17, Bold,
+                    label, if (label.length > 12) 14 else 17, Bold,
                     color = if (selected) Color.White else colors.tertiaryText,
-                    maxLines = 1,
+                    maxLines = 2,
+                    textAlign = TextAlign.Center,
                     modifier = Modifier.padding(horizontal = 4.dp),
                 )
             }

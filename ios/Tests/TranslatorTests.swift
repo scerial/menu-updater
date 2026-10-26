@@ -55,7 +55,7 @@ final class TranslatorTests: XCTestCase {
         let bundled = try XCTUnwrap(Translator.load(from: Bundle(for: MenuViewModel.self)))
         XCTAssertEqual(bundled.dish("깍두기"), "Cubed Radish Kimchi")
         XCTAssertEqual(bundled.dish("공나물무침"), "Seasoned Bean Sprouts")
-        XCTAssertEqual(bundled.place("향설1관"), "Hyangseol Hall 1")
+        XCTAssertEqual(bundled.place("향설1관"), "Hyangseol 1")
     }
 
     func testDates() {
