@@ -127,8 +127,8 @@ enum VenueDirectory {
         ("교직원식당", [
             Venue(building: "교직원식당", name: "중식", weekday: t(11)..<t(14))
         ]),
-        ("천안의대식당", [
-            Venue(building: "천안의대식당", name: "중식", weekday: t(11)..<t(14))
+        ("순천향의대식당", [
+            Venue(building: "순천향의대식당", name: "중식", weekday: t(11)..<t(14))
         ])
     ]
 }
