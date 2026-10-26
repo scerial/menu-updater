@@ -16,3 +16,19 @@ Clone outside iCloud Drive / OneDrive (e.g. `~/Developer/menu-updater` on the Ma
 - Android work happens on the `android-port` branch; iOS fixes go on `main` or a short-lived branch.
 - `ios/WeeklyMenu.xcodeproj` is not committed. After cloning or pulling, run `xcodegen generate` in `ios/`.
 - The `.icon` bundles (`ios/Sources/AppIcon.icon`, `design/IconComposer/icon.icon`) are folders on macOS; edit them on the Mac.
+
+## License
+
+Copyright (C) 2026 Youngmin Kim
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>. The full text is in [`LICENSE`](LICENSE).
+
+SPDX-License-Identifier: GPL-3.0-or-later
+
+### Additional permission under GNU GPL version 3 section 7
+
+If you modify this Program, or any covered work, by linking or combining it with Google ML Kit (or a modified version of that library), containing parts covered by the terms of the ML Kit Terms of Service, the licensors of this Program grant you additional permission to convey the resulting work.
