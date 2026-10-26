@@ -10,7 +10,7 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.menuupdater.weeklymenu"
+        applicationId = "io.github.scerial.soonmenu"
         minSdk = 33
         targetSdk = 36
         versionCode = 1

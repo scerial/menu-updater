@@ -26,7 +26,7 @@ Stable facts that are not in `ios/HANDOFF.md` or `android/PLAN.md`. Read those f
 ## Mac / Xcode setup
 - Xcode 27.1, xcodegen 2.46.0. `project.yml` is the source of truth. Run `xcodegen generate` after adding or removing files.
 - Keep `GENERATE_INFOPLIST_FILE: YES`. `xcodeVersion: "27.1"` silences the recommended-settings prompt.
-- Signing: automatic, team `S9553U34PA`, bundle id `com.menuupdater.weeklymenu`.
+- Signing: automatic, team `S9553U34PA`, bundle id `io.github.scerial.soonmenu`.
 - iPhone 17 Pro simulator id: `3984BDE0-402B-472E-8E07-B2BBCF95D66A`. The iPad Pro 13" simulator `6C54E96D-…` no longer resolves as a destination.
 - Test: `xcodebuild test -project WeeklyMenu.xcodeproj -scheme WeeklyMenu -destination 'id=3984BDE0-402B-472E-8E07-B2BBCF95D66A' -derivedDataPath <temp dir>`. The OCR test takes about 45 s.
 - App icon: Icon Composer `Sources/AppIcon.icon`, enabled by `ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon`. Source layers live in `design/IconComposer/`.
@@ -38,9 +38,9 @@ Stable facts that are not in `ios/HANDOFF.md` or `android/PLAN.md`. Read those f
 - `gh` is at `C:\Program Files\GitHub CLI\gh.exe` (not on PATH in older shells) and signed in as `scerial`; `gh auth setup-git` is done. Commit identity: Youngmin Kim <jacobkim0707@gmail.com>.
 - In the VS Code extension, a `!` command typed in the prompt is sent as text and not run. Run interactive logins as a background task and pass the device code to the user.
 - Line endings: `.gitattributes` uses `text=auto`, so the "LF will be replaced by CRLF" warnings on Windows are expected.
-- First Windows PC (set up 2026-10-25): Android Studio and the SDK are in `%LOCALAPPDATA%\Android\Sdk`; `JAVA_HOME`/`ANDROID_HOME` are saved as user env vars (Studio's bundled JBR). AVDs: `phone_api36/33`, `tablet_api36/33`. Wifi debugging: `adb mdns services`, then `adb connect <ip:port>`; the address changes after a reconnect. A phone with the app signed by another PC's debug key needs `adb uninstall com.menuupdater.weeklymenu` before `installDebug`.
+- First Windows PC (set up 2026-10-25): Android Studio and the SDK are in `%LOCALAPPDATA%\Android\Sdk`; `JAVA_HOME`/`ANDROID_HOME` are saved as user env vars (Studio's bundled JBR). AVDs: `phone_api36/33`, `tablet_api36/33`. Wifi debugging: `adb mdns services`, then `adb connect <ip:port>`; the address changes after a reconnect. A phone with the app signed by another PC's debug key needs `adb uninstall io.github.scerial.soonmenu` before `installDebug`.
 - Gated JVM tools (set the env var, run `:app:testDebugUnitTest --tests "*Name*"`): `BUILD_LEXICON=1`, `EVAL_VOTING=1`, `EXPORT_DISHES=1`, `EVAL_TRANSLATION=1`. They read the local, uncommitted `android/ocr-corpus/` (see `ocr/OCR_PLAN.md`).
-- App name: 순대 학식 (Korean) / SCH Menu (English). The package and bundle id stay `com.menuupdater.weeklymenu`.
+- App name: 순대 학식 (Korean) / SCH Menu (English). The app id (Android `applicationId`, iOS bundle id) is `io.github.scerial.soonmenu`; the Kotlin `namespace` and source package stay `com.menuupdater.weeklymenu`.
 ## Gotchas
 - Previews (`PreviewData.swift`) can only be rendered in the Xcode canvas, not from the command line.
 - OCR output varies between runs and can misread dish names.

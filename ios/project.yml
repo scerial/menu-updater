@@ -23,7 +23,7 @@ targets:
       - package: SwiftSoup
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.menuupdater.weeklymenu
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.scerial.soonmenu
         DEVELOPMENT_TEAM: S9553U34PA
         CODE_SIGN_STYLE: Automatic
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
@@ -45,6 +45,6 @@ targets:
       - target: WeeklyMenu
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.menuupdater.weeklymenu.tests
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.scerial.soonmenu.tests
         GENERATE_INFOPLIST_FILE: YES
         SWIFT_VERSION: 5.0

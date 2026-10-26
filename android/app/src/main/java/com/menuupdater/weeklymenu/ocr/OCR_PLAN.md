@@ -40,11 +40,11 @@ Lives next to `OcrService.kt`. The overall Android status is in `android/PLAN.md
 ### Rebuild each semester (with `schedule.json`)
 ```
 gradlew :app:installDebug :app:installDebugAndroidTest
-adb shell am instrument -w -e class com.menuupdater.weeklymenu.DishCorpusDump com.menuupdater.weeklymenu.test/androidx.test.runner.AndroidJUnitRunner
-adb pull /sdcard/Android/data/com.menuupdater.weeklymenu/files/corpus android/ocr-corpus
+adb shell am instrument -w -e class com.menuupdater.weeklymenu.DishCorpusDump io.github.scerial.soonmenu.test/androidx.test.runner.AndroidJUnitRunner
+adb pull /sdcard/Android/data/io.github.scerial.soonmenu/files/corpus android/ocr-corpus
 $env:BUILD_LEXICON="1"; gradlew :app:testDebugUnitTest --tests "*BuildDishLexicon*"
 ```
-Then read `android/build/lexicon-report.txt`, update `KEEP`/`FIXES` if a real dish was rewritten, and rebuild. If the phone has this app signed by another PC's debug key, `adb uninstall com.menuupdater.weeklymenu` first.
+Then read `android/build/lexicon-report.txt`, update `KEEP`/`FIXES` if a real dish was rewritten, and rebuild. If the phone has this app signed by another PC's debug key, `adb uninstall io.github.scerial.soonmenu` first.
 
 ### Runtime voting (2026-10-25, not committed)
 - Each image is now read three ways (`CONTRAST_UPSCALE` as the reference, plus `CONTRAST` and `NONE`); `domain/TableVoter` keeps the spelling most readings agree on, per dish, with the reference deciding the layout. `MenuRepository(variantRecognizers = …)`, `OcrService.variantRecognizers`. The lexicon corrector runs after the vote.
@@ -84,8 +84,8 @@ The slow device-only work (downloading and running OCR) happens **once**. Everyt
 - Commands, from `android/`, with `JAVA_HOME` and `ANDROID_HOME` set:
   ```
   .\gradlew.bat :app:installDebug :app:installDebugAndroidTest
-  adb shell am instrument -w -e class com.menuupdater.weeklymenu.DishCorpusDump com.menuupdater.weeklymenu.test/androidx.test.runner.AndroidJUnitRunner
-  adb pull /sdcard/Android/data/com.menuupdater.weeklymenu/files/corpus ocr-corpus
+  adb shell am instrument -w -e class com.menuupdater.weeklymenu.DishCorpusDump io.github.scerial.soonmenu.test/androidx.test.runner.AndroidJUnitRunner
+  adb pull /sdcard/Android/data/io.github.scerial.soonmenu/files/corpus ocr-corpus
   ```
 - Put the output in `android/ocr-corpus/` and add that folder to `.gitignore`. It is about 2–3 MB, kept locally only, and rerun only to refresh the lexicon.
 
