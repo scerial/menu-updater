@@ -6,7 +6,7 @@ Working plan for porting the iOS Weekly Menu app to Android. Requirements are in
 - **Everything through the OCR quality pass is committed** (`d4a1767`) and merged into `main` via PR #1.
 - **First PC set up (2026-10-25):** Android Studio 2026.2.1.8, SDK in `%LOCALAPPDATA%\Android\Sdk` (platforms 33/36/37.0 — the package is `platforms;android-37.0`, build-tools 36.0.0, platform-tools, emulator, Play x86_64 images 33/36), AVDs `phone_api36/33`, `tablet_api36/33`. `JAVA_HOME`/`ANDROID_HOME` saved as user env vars.
 - **Dish-lexicon OCR correction: built and run on the Note 20 (2026-10-25), committed (`b38c504`, voting `47cabab`).** 49 unit tests pass. Details, the RATIO 2 decision and rebuild commands are in `app/src/main/java/com/menuupdater/weeklymenu/ocr/OCR_PLAN.md`. Runtime voting across three OCR readings is also built (`TableVoter`, see OCR_PLAN.md); 61 unit tests pass; first live load 7 s on the Note 20. Step 7 verification is still open.
-- **Devices:** Note 20 Ultra (`adb` serial `R3CN80FEZ1T`) is the main test phone. A friend's S25 Ultra is sometimes available for an extra check.
+- **Devices:** Note 20 Ultra is the main test phone. A friend's S25 Ultra is sometimes available for an extra check.
 
 ## Status (2026-10-24)
 - **Steps 1 and 2 done** on a second Windows PC (`C:\dev\menu-updater`, `android-port` branch). Two commits: `443d040` (step 1 smoke-test baseline), `3830e5c` (step 2 OCR spike + fixtures).
@@ -30,8 +30,8 @@ Working plan for porting the iOS Weekly Menu app to Android. Requirements are in
 
 ## Decisions made
 - Android Studio, installed via winget.
-- Commit identity: Youngmin Kim <jacobkim0707@gmail.com> (set globally on Windows).
-- `gh` CLI at `C:\Program Files\GitHub CLI\gh.exe`, signed in as `scerial`.
+- Commit identity is set globally on Windows.
+- `gh` CLI installed and signed in.
 - Still open: is a physical Galaxy device available?
 
 ## Environment (checked 2026-10-22)

@@ -35,7 +35,7 @@ Stable facts that are not in `ios/HANDOFF.md` or `android/PLAN.md`. Read those f
 ## Windows / Android setup
 - Windows clone: `C:\dev\menu-updater`, outside iCloud Drive and OneDrive. Android work goes on the `android-port` branch; iOS fixes go on `main` or a short-lived branch. The user pulls before starting and pushes when done on each machine; agents commit or push only when asked.
 - Why not iCloud: it leaves files as placeholders, can't represent macOS bundles on Windows, can create "file 2" conflict copies, and would sync Gradle and Xcode build output.
-- `gh` is at `C:\Program Files\GitHub CLI\gh.exe` (not on PATH in older shells) and signed in as `scerial`; `gh auth setup-git` is done. Commit identity: Youngmin Kim <jacobkim0707@gmail.com>.
+- `gh` is installed and signed in on both machines (it may not be on PATH in older Windows shells); `gh auth setup-git` is done. The commit identity is set globally on each machine.
 - In the VS Code extension, a `!` command typed in the prompt is sent as text and not run. Run interactive logins as a background task and pass the device code to the user.
 - Line endings: `.gitattributes` uses `text=auto`, so the "LF will be replaced by CRLF" warnings on Windows are expected.
 - First Windows PC (set up 2026-10-25): Android Studio and the SDK are in `%LOCALAPPDATA%\Android\Sdk`; `JAVA_HOME`/`ANDROID_HOME` are saved as user env vars (Studio's bundled JBR). AVDs: `phone_api36/33`, `tablet_api36/33`. Wifi debugging: `adb mdns services`, then `adb connect <ip:port>`; the address changes after a reconnect. A phone with the app signed by another PC's debug key needs `adb uninstall io.github.scerial.soonmenu` before `installDebug`.
