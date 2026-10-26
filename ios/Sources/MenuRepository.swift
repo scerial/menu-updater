@@ -212,10 +212,14 @@ struct MenuRepository {
             let title = try link.text().trimmingCharacters(in: .whitespacesAndNewlines)
             guard isEligible(title) else { continue }
             guard let url = URL(string: try link.attr("href"), relativeTo: baseURL)?.absoluteURL else { continue }
-            let rowText = try link.parent()?.parent()?.text() ?? ""
+            let row = link.parent()?.parent()
+            // Recent posts show a relative time ("3시간전"); the full date is only in `li.time`'s title.
+            let timeTitle = try row?.select("li.time").first()?.attr("title") ?? ""
+            let rowText = try row?.text() ?? ""
             // Posts without a parseable date can't be ordered, so they are skipped.
-            guard let dateRange = rowText.range(of: #"\d{4}-\d{2}-\d{2}"#, options: .regularExpression) else { continue }
-            let date = String(rowText[dateRange])
+            guard let date = [timeTitle, rowText].lazy.compactMap({ text in
+                text.range(of: #"\d{4}-\d{2}-\d{2}"#, options: .regularExpression).map { String(text[$0]) }
+            }).first else { continue }
             posts.append(MenuPost(title: title, date: date, url: url))
         }
         return posts
