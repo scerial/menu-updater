@@ -14,9 +14,7 @@ Shows today's and this week's 순천향대학교 cafeteria menus from https://ww
 Clone outside iCloud Drive / OneDrive (e.g. `~/Developer/menu-updater` on the Mac, `C:\dev\menu-updater` on Windows).
 
 - Pull before you start, push when you stop.
-- Work on a short-lived branch from `main` (for example `feature/ocr-lexicon`), open a pull request, merge it, and delete the branch. iOS and Android both go through `main`.
-- Each store release is tagged on `main` as `vMAJOR.MINOR` (for example `v0.2`), matching the app's `versionName`.
-- `ios/WeeklyMenu.xcodeproj` is not committed. After cloning or pulling, run `xcodegen generate` in `ios/`.
+- Work on a short-lived branch from `main` (for example `feature/ocr-lexicon`), open a pull request, merge it, and delete the branch. iOS and Android both go through `main`.- `ios/WeeklyMenu.xcodeproj` is not committed. After cloning or pulling, run `xcodegen generate` in `ios/`.
 - The `.icon` bundles (`ios/Sources/AppIcon.icon`, `design/IconComposer/icon.icon`) are folders on macOS; edit them on the Mac.
 
 ## License

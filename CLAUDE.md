@@ -45,7 +45,7 @@ Reviewed 2026-10-26 for the Google Play release (Play Data policy, a risk assess
 - The `.icon` bundles are folders on macOS but show up as 0-byte files in iCloud for Windows, so edit them on the Mac only.
 
 ## Windows / Android setup
-- Windows clone: `C:\dev\menu-updater`, outside iCloud Drive and OneDrive. Work goes on a short-lived branch from `main` for both platforms, merged by pull request and then deleted; each store release is tagged `vMAJOR.MINOR` on `main`. The user pulls before starting and pushes when done on each machine; agents commit or push only when asked.
+- Windows clone: `C:\dev\menu-updater`, outside iCloud Drive and OneDrive. Work goes on a short-lived branch from `main` for both platforms, merged by pull request and then deleted. The user pulls before starting and pushes when done on each machine; agents commit or push only when asked.
 - Why not iCloud: it leaves files as placeholders, can't represent macOS bundles on Windows, can create "file 2" conflict copies, and would sync Gradle and Xcode build output.
 - `gh` is installed and signed in on both machines (it may not be on PATH in older Windows shells); `gh auth setup-git` is done. The commit identity is set globally on each machine.
 - In the VS Code extension, a `!` command typed in the prompt is sent as text and not run. Run interactive logins as a background task and pass the device code to the user.
