@@ -239,7 +239,7 @@ struct LanguageFlip: ViewModifier {
                 .contentShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
                 .onTapGesture { withAnimation(.easeInOut(duration: 0.15)) { showKorean.toggle() } }
                 .accessibilityAddTraits(.isButton)
-                .accessibilityHint(Text("탭하면 언어를 바꿔요"))
+                .accessibilityHint(Text("탭하면 언어를 바꿉니다"))
         } else {
             content
         }

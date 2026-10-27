@@ -286,7 +286,7 @@ struct MenuScreen<Content: View>: View {
                 LoadingState()
             } else if let message = viewModel.errorMessage {
                 ContentUnavailableView {
-                    Label("메뉴를 불러올 수 없어요", systemImage: "wifi.slash")
+                    Label("메뉴를 불러올 수 없습니다", systemImage: "wifi.slash")
                 } description: {
                     Text(message)
                 } actions: {
@@ -295,7 +295,7 @@ struct MenuScreen<Content: View>: View {
                 }
             } else {
                 ContentUnavailableView {
-                    Label { Text("메뉴가 없어요") } icon: { TrayIcon(size: 48) }
+                    Label { Text("메뉴가 없습니다") } icon: { TrayIcon(size: 48) }
                 }
             }
         }
@@ -376,7 +376,7 @@ struct LoadingState: View {
                 .controlSize(.large)
             Text("메뉴를 읽는 중…")
                 .appFont(17, .bold)
-            Text("처음 불러올 때는 시간이 조금 걸려요.")
+            Text("처음 불러올 때는 시간이 조금 걸립니다.")
                 .appFont(15)
                 .foregroundStyle(Theme.secondaryText)
         }
@@ -389,7 +389,7 @@ struct StaleMenuBanner: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Label("새로고침하지 못해 저장된 메뉴를 보여줘요.", systemImage: "wifi.exclamationmark")
+            Label("새로고침하지 못해 저장된 메뉴를 보여 드립니다.", systemImage: "wifi.exclamationmark")
                 .appFont(15, .bold)
             Text(message)
                 .appFont(13)
@@ -406,6 +406,7 @@ struct SourceFooter: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
+            Text("메뉴는 게시된 이미지를 글자 인식으로 만들기 때문에 틀릴 수 있습니다. 알레르기·원산지 정보는 원본 게시물에서 확인하시기 바랍니다.")
             ForEach(sources, id: \.url) { source in
                 VStack(alignment: .leading, spacing: 4) {
                     Text(source.title)
@@ -436,9 +437,9 @@ struct TodayPage: View {
         if entries.isEmpty {
             MenuScroll(menu: menu, layout: layout) {
                 ContentUnavailableView(
-                    "오늘 메뉴가 없어요",
+                    "오늘 메뉴가 없습니다",
                     systemImage: "calendar.badge.exclamationmark",
-                    description: Text("이 게시물에는 오늘 날짜가 없어요. 이번 주 탭을 확인해 주세요.")
+                    description: Text("이 게시물에는 오늘 날짜가 없습니다. 이번 주 탭을 확인해 주시기 바랍니다.")
                 )
             }
         } else if layout.showsColumns {
@@ -491,8 +492,8 @@ struct TodayColumn: View {
                         .id(meal.name)
                 }
             } else {
-                EmptyMealCard(title: String(localized: "오늘 메뉴가 없어요"),
-                              detail: String(localized: "\(Tr.current.place(table.cafeteria)) 메뉴에 오늘 날짜가 없어요."))
+                EmptyMealCard(title: String(localized: "오늘 메뉴가 없습니다"),
+                              detail: String(localized: "\(Tr.current.place(table.cafeteria)) 메뉴에 오늘 날짜가 없습니다."))
             }
         }
     }
@@ -844,12 +845,12 @@ struct WeekRow: View {
 }
 
 extension EmptyMealCard {
-    /// "향설1관은 중식만 운영해요" for a cafeteria that doesn't serve the chosen meal.
+    /// "향설1관은 중식만 운영합니다" for a cafeteria that doesn't serve the chosen meal.
     static func notServing(_ table: MenuTable) -> EmptyMealCard {
         let tr = Tr.current
         return EmptyMealCard(
-            title: String(localized: "이 시간에는 운영하지 않아요"),
-            detail: String(localized: "\(tr.place(table.cafeteria))은 \(table.mealNames.map(tr.meal).joined(separator: " · "))만 운영해요")
+            title: String(localized: "이 시간에는 운영하지 않습니다"),
+            detail: String(localized: "\(tr.place(table.cafeteria))은 \(table.mealNames.map(tr.meal).joined(separator: " · "))만 운영합니다")
         )
     }
 }
