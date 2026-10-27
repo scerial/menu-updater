@@ -17,8 +17,8 @@ struct SettingsPage: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 28) {
                     SettingsSection(title: String(localized: "기본 식당"),
-                                    footer: cafeterias.isEmpty ? String(localized: "메뉴를 불러오면 식당을 고를 수 있어요.")
-                                                               : String(localized: "앱을 열면 이 식당의 메뉴를 먼저 보여줘요.")) {
+                                    footer: cafeterias.isEmpty ? String(localized: "메뉴를 불러오면 식당을 고를 수 있습니다.")
+                                                               : String(localized: "앱을 열면 이 식당의 메뉴를 먼저 보여 드립니다.")) {
                         ForEach(Array(cafeterias.enumerated()), id: \.element) { index, name in
                             if index > 0 { SettingsDivider() }
                             let isSelected = name == defaultCafeteria || (index == 0 && !cafeterias.contains(defaultCafeteria))
@@ -61,7 +61,8 @@ struct SettingsPage: View {
                         .padding(16)
                     }
 
-                    SettingsSection(title: String(localized: "정보")) {
+                    SettingsSection(title: String(localized: "정보"),
+                                    footer: String(localized: "순천향대학교·식당 운영사와 관련 없는 비공식 앱입니다.")) {
                         if let url = viewModel.menu?.sourceURL {
                             Link(destination: url) {
                                 HStack {
@@ -76,6 +77,18 @@ struct SettingsPage: View {
                             .buttonStyle(.plain)
                             SettingsDivider()
                         }
+                        Link(destination: Self.privacyURL(english: tr.isEnglish)) {
+                            HStack {
+                                Text("개인정보 처리방침")
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 15, weight: .semibold))
+                                    .foregroundStyle(Theme.secondaryText)
+                            }
+                            .settingsRow()
+                        }
+                        .buttonStyle(.plain)
+                        SettingsDivider()
                         HStack {
                             Text("앱 버전")
                             Spacer()
@@ -92,6 +105,10 @@ struct SettingsPage: View {
                 .frame(maxWidth: .infinity, alignment: layout.isWide ? .leading : .center)
             }
         }
+    }
+
+    private static func privacyURL(english: Bool) -> URL {
+        URL(string: "https://scerial.github.io/menu-updater/privacy/#\(english ? "en" : "ko")")!
     }
 
     private static var appVersion: String {

@@ -188,9 +188,9 @@ struct VenuePanel: View {
     }
 
     private func footer(at date: Date) -> String {
-        let text = String(localized: "2026학년도 2학기 운영 안내(8.31–12.11) 기준이에요. 이용률에 따라 일부 바뀔 수 있어요. 문의: 학생지원팀 041-530-1033")
+        let text = String(localized: "2026학년도 2학기 운영 안내(8.31–12.11) 기준입니다. 이용률에 따라 일부 바뀔 수 있습니다. 문의: 학생지원팀 041-530-1033")
         if VenueDirectory.isWithinNotice(date) { return text }
-        return String(localized: "지금은 이 안내가 다루는 기간이 아니라서 시간이 다를 수 있어요. \(text)")
+        return String(localized: "지금은 이 안내가 다루는 기간이 아니어서 시간이 다를 수 있습니다. \(text)")
     }
 }
 

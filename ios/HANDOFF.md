@@ -30,6 +30,7 @@ Not yet done: testing on a physical device, and the iPad/iPhone layouts in lands
 
 ### Update 2026-10-26
 - **Board date fix (iOS only):** recent posts show a relative time ("3시간전") in the row text, so the `yyyy-MM-dd` regex found nothing and those posts were skipped. `MenuRepository` now reads the date from `li.time`'s `title` first, then falls back to the row text. Merged from `claude/ios-menu-update-issue-zf8z44`. Android does not have this bug (confirmed by the user), so `BoardParser.kt` needs no change.
+- **Disclaimer and privacy (mirrors Android):** `SourceFooter` shows the "OCR can be wrong, check allergy/origin in the original post" note on every menu page. Settings > 정보 has a 개인정보 처리방침 row (opens the GitHub Pages policy at `#ko` or `#en` by the app's language) and a footer saying the app is unofficial. The ML Kit diagnostics sentence is Android only; Apple Vision runs on the device. Strings are in `Localizable.xcstrings`.
 
 ## Files
 - `project.yml`: XcodeGen manifest; iOS 17.0, SwiftSoup dependency, app and unit-test targets.

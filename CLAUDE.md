@@ -6,7 +6,7 @@ Stable facts that are not in `ios/HANDOFF.md` or `android/PLAN.md`. Read those f
 
 ## Preferences and feedback
 - Keep replies short. Report outcomes plainly, including what was only build-checked and not looked at.
-- Korean UI text, friendly "~해요" tone. Text-only menus; no image fallback.
+- Korean UI text in the formal "~합니다/~입니다" tone (changed from "~해요" on 2026-10-27), on both platforms. Text-only menus; no image fallback.
 - English follows the phone (or the per-app language in system Settings); there is no in-app toggle. In English, dishes show translated and tapping a menu card flips it to Korean. A dish missing from the dictionary gets a word-by-word guess, or stays Korean.
 - Everything runs on the device. No backend, no Tailscale.
 - iPhone is portrait only (landscape was judged not worth it). iPad supports all four orientations.
@@ -33,7 +33,7 @@ Reviewed 2026-10-26 for the Google Play release (Play Data policy, a risk assess
 - Risk assessment (severity x likelihood): YELLOW, OCR misreads relied on for allergies (8, mitigated by the disclaimer); YELLOW, Play IP/impersonation rejection because content comes from agoodplacefnb.com and the name uses 순대/SCH (6-9); YELLOW, Data safety vs policy mismatch (6). GREEN: 부정경쟁방지법 (파)목 / DB rights claim (3), server load (4), stale hours (4), 개인정보 보호법 (2), public personal email (4).
 - Crawling precedent: in 야놀자 v 여기어때 the criminal charges (정보통신망법, 저작권법, 업무방해) ended in acquittal (Supreme Court, 2022) because the data was public, but the civil case found 부정경쟁방지법 성과물 도용 and awarded 10억 won. That case was a commercial competitor copying a DB with ~16M requests. This app is free, non-competing and links the source, which is why the civil risk is GREEN. Adding ads or paid features means re-assessing.
 - Keep: free and ad-free; no university logo in the icon, screenshots or listing; the store description's first line says it is an unofficial app not affiliated with 순천향대학교 or the cafeteria operator; refresh no more than every 30 minutes.
-- Open: ask 어굿플레이스 F&B or the university for written permission to show the menus (strongest answer to an IP complaint); confirm the Play developer name appears in the policy; mirror the Android disclaimer, About footer and privacy link in the iOS app before an App Store release.
+- Open: ask 어굿플레이스 F&B or the university for written permission to show the menus (strongest answer to an IP complaint); confirm the Play developer name appears in the policy.
 
 ## Mac / Xcode setup
 - Xcode 27.1, xcodegen 2.46.0. `project.yml` is the source of truth. Run `xcodegen generate` after adding or removing files.
