@@ -152,6 +152,7 @@ fun LinkText(label: String, url: String, size: Int = 13) {
 fun SourceFooter(sources: List<com.menuupdater.weeklymenu.domain.MenuSource>, modifier: Modifier = Modifier) {
     val colors = LocalMenuColors.current
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        AppText(stringResource(R.string.ocr_disclaimer), 13, color = colors.secondaryText)
         for (source in sources) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 AppText(source.title, 13, color = colors.secondaryText)
@@ -159,7 +160,6 @@ fun SourceFooter(sources: List<com.menuupdater.weeklymenu.domain.MenuSource>, mo
                 LinkText(stringResource(R.string.open_source_post), source.url)
             }
         }
-        AppText(stringResource(R.string.ocr_disclaimer), 13, color = colors.secondaryText)
     }
 }
 
