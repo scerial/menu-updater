@@ -27,6 +27,9 @@ targets:
         DEVELOPMENT_TEAM: S9553U34PA
         CODE_SIGN_STYLE: Automatic
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        # Matches Android versionName 0.2.5 / versionCode 2.
+        MARKETING_VERSION: 0.2.5
+        CURRENT_PROJECT_VERSION: 2
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: 순대 학식
         INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsArbitraryLoads: NO
