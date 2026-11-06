@@ -1,24 +1,36 @@
 {
-  "sourceLanguage": "ko",
-  "strings": {
-    "CFBundleDisplayName": {
-      "comment": "Home screen name",
-      "extractionState": "extracted_with_value",
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "new",
-            "value": "순대 학식"
+  "sourceLanguage" : "ko",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "comment" : "Home screen name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SCH Menu"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "SCH Menu"
+        "ko" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "순대 학식"
+          }
+        }
+      }
+    },
+    "CFBundleName" : {
+      "comment" : "Bundle name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "WeeklyMenu"
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }
