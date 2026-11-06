@@ -20,6 +20,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,6 +37,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.menuupdater.weeklymenu.R
 import com.menuupdater.weeklymenu.data.MenuError
@@ -218,6 +222,7 @@ fun ScreenHeader(
     title: String,
     layout: ScreenLayout,
     isRefreshing: Boolean = false,
+    onRefresh: (() -> Unit)? = null,
     trailing: (@Composable () -> Unit)? = null,
     accessory: (@Composable () -> Unit)? = null,
 ) {
@@ -244,6 +249,18 @@ fun ScreenHeader(
                         strokeWidth = 2.dp,
                         modifier = Modifier.size(22.dp).padding(bottom = 4.dp),
                     )
+                } else if (onRefresh != null) {
+                    Box(
+                        Modifier.size(48.dp).clickable(onClick = onRefresh),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            painterResource(R.drawable.ic_refresh),
+                            contentDescription = stringResource(R.string.refresh),
+                            tint = colors.secondaryText,
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
                 }
                 trailing?.invoke()
             }
@@ -255,6 +272,7 @@ fun ScreenHeader(
 
 // MARK: - Menu screen frame (Today/Week)
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MenuScreen(
     viewModel: MenuViewModel,
@@ -272,6 +290,7 @@ fun MenuScreen(
             title = title,
             layout = layout,
             isRefreshing = viewModel.isLoading && menu != null,
+            onRefresh = if (menu != null) ({ viewModel.refresh() }) else null,
             accessory = {
                 if (menu != null && menu.tables.size > 1 && !layout.showsColumns) {
                     CafeteriaPicker(menu.tables.map { it.cafeteria }, cafeteria, onSelectCafeteria)
@@ -279,7 +298,11 @@ fun MenuScreen(
             },
         )
         when {
-            menu != null -> content(menu, cafeteria)
+            menu != null -> PullToRefreshBox(
+                isRefreshing = viewModel.isLoading,
+                onRefresh = { viewModel.refresh() },
+                modifier = Modifier.fillMaxSize(),
+            ) { content(menu, cafeteria) }
             viewModel.isLoading -> LoadingState()
             viewModel.error != null -> ErrorState(viewModel.error!!) { viewModel.refresh() }
             else -> CenterMessage(stringResource(R.string.no_menu))
