@@ -31,6 +31,11 @@ final class MenuViewModel {
 
     init() {
         menu = repository.loadCachedMenu()
+        PhoneConnectivity.shared.onRefreshRequest = { [weak self] in
+            Task { @MainActor in await self?.refresh() }
+        }
+        PhoneConnectivity.shared.start()
+        if let menu { PhoneConnectivity.shared.push(menu) }
         Task { await refresh() }
     }
 
@@ -65,6 +70,7 @@ final class MenuViewModel {
             menu = result
             lastRefreshed = Date()
             repository.saveCachedMenu(result)
+            PhoneConnectivity.shared.push(result)
         } catch {
             errorMessage = error.localizedDescription
         }
