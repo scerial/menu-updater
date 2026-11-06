@@ -26,6 +26,7 @@
     <string name="loading_detail">The first load takes a little while.</string>
     <string name="error_title">Couldn\'t load the menu</string>
     <string name="retry">Try again</string>
+    <string name="refresh">Refresh</string>
     <string name="no_menu">No menu</string>
     <string name="tap_to_switch_language">Tap to switch between English and Korean</string>
 

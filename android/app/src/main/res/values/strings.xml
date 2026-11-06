@@ -26,6 +26,7 @@
     <string name="loading_detail">처음 불러올 때는 시간이 조금 걸립니다.</string>
     <string name="error_title">메뉴를 불러올 수 없습니다</string>
     <string name="retry">다시 시도</string>
+    <string name="refresh">새로고침</string>
     <string name="no_menu">메뉴가 없습니다</string>
     <string name="tap_to_switch_language">탭하면 언어를 바꿉니다</string>
 
