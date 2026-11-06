@@ -6,6 +6,7 @@ options:
   xcodeVersion: "27.1"
   deploymentTarget:
     iOS: "17.0"
+    watchOS: "10.0"
 packages:
   SwiftSoup:
     url: https://github.com/scinfu/SwiftSoup.git
@@ -16,11 +17,13 @@ targets:
     platform: iOS
     sources:
       - path: Sources
+      - path: Shared
       # Dish, cafeteria and venue English, shared with Android (one file for both apps).
       - path: ../shared/translations/en.json
         buildPhase: resources
     dependencies:
       - package: SwiftSoup
+      - target: WeeklyMenuWatch
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: io.github.scerial.soonmenu
@@ -39,6 +42,27 @@ targets:
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait"
         SWIFT_VERSION: 5.0
         TARGETED_DEVICE_FAMILY: "1,2"
+  WeeklyMenuWatch:
+    type: application
+    platform: watchOS
+    sources:
+      - path: Watch
+      - path: Shared
+      # The same Icon Composer icon as the iPhone app (one .icon serves every platform).
+      - path: Sources/AppIcon.icon
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.scerial.soonmenu.watchkitapp
+        DEVELOPMENT_TEAM: S9553U34PA
+        CODE_SIGN_STYLE: Automatic
+        MARKETING_VERSION: 0.2.5
+        CURRENT_PROJECT_VERSION: 2
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: 순대 학식
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        INFOPLIST_KEY_WKCompanionAppBundleIdentifier: io.github.scerial.soonmenu
+        SWIFT_VERSION: 5.0
+        TARGETED_DEVICE_FAMILY: "4"
   WeeklyMenuTests:
     type: bundle.unit-test
     platform: iOS
@@ -51,3 +75,15 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: io.github.scerial.soonmenu.tests
         GENERATE_INFOPLIST_FILE: YES
         SWIFT_VERSION: 5.0
+schemes:
+  WeeklyMenu:
+    build:
+      targets:
+        WeeklyMenu: all
+    test:
+      targets:
+        - WeeklyMenuTests
+  WeeklyMenuWatch:
+    build:
+      targets:
+        WeeklyMenuWatch: all

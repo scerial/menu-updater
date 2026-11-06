@@ -3,36 +3,6 @@ import Vision
 import ImageIO
 import SwiftSoup
 
-/// A board post a menu was read from.
-struct MenuSource: Codable, Equatable {
-    let title: String
-    let postedAt: String
-    let url: URL
-}
-
-struct WeeklyMenu: Codable, Equatable {
-    let title: String
-    let postedAt: String
-    let sourceURL: URL
-    let tables: [MenuTable]
-    /// Further posts merged into this menu (the 의과대학 post). Optional so older cached menus still load.
-    var additionalSources: [MenuSource]? = nil
-
-    /// Every post this menu came from, main post first.
-    var sources: [MenuSource] {
-        [MenuSource(title: title, postedAt: postedAt, url: sourceURL)] + (additionalSources ?? [])
-    }
-
-    /// Each cafeteria's menu for the given date, matched on the month/day printed in the column headers.
-    func entries(on date: Date = Date(), calendar: Calendar = .current) -> [(cafeteria: String, day: MenuDay)] {
-        let components = calendar.dateComponents([.month, .day], from: date)
-        return tables.compactMap { table in
-            table.days.first { $0.month == components.month && $0.day == components.day }
-                .map { (cafeteria: table.cafeteria, day: $0) }
-        }
-    }
-}
-
 struct MenuPost {
     let title: String
     let date: String

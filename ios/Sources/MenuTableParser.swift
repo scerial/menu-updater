@@ -7,30 +7,6 @@ struct RecognizedLine: Equatable {
     let box: CGRect
 }
 
-struct MealSection: Codable, Equatable, Identifiable {
-    let name: String
-    let items: [String]
-
-    var id: String { name }
-}
-
-struct MenuDay: Codable, Equatable, Identifiable {
-    let month: Int
-    let day: Int
-    let weekday: String
-    let meals: [MealSection]
-
-    var id: Int { month * 100 + day }
-    var heading: String { "\(month)월 \(day)일 (\(weekday))" }
-}
-
-struct MenuTable: Codable, Equatable, Identifiable {
-    let cafeteria: String
-    let days: [MenuDay]
-
-    var id: String { cafeteria }
-}
-
 /// Rebuilds a weekly menu table (one column per day, one row group per meal) from OCR lines and their positions.
 enum MenuTableParser {
     private static let mealNames: Set<String> = ["조식", "중식", "석식"]
